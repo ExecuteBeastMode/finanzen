@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--accent:#22c55e;--danger:#ef4444;--line:#1f2937}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#0f172a,#111827);color:var(--text);min-height:100vh}
+    .wrap{max-width:980px;margin:0 auto;padding:32px 16px 48px}
+    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:24px}
+    h1{margin:0;font-size:clamp(2rem,4vw,3rem)} .sub{color:var(--muted);margin-top:8px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0}
+    .card,.panel{background:rgba(17,24,39,.85);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card{padding:18px} .label{color:var(--muted);font-size:.9rem}.value{font-size:1.6rem;font-weight:700;margin-top:10px}
+    .panel{padding:18px;margin-top:16px}
+    .row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px}
+    input,select,button{width:100%;border-radius:12px;border:1px solid #334155;background:#0b1220;color:var(--text);padding:12px 14px;font-size:1rem}
+    button{cursor:pointer;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;font-weight:700}
+    button:hover{filter:brightness(1.05)}
+    .list{margin:0;padding:0;list-style:none}.item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+    .item:last-child{border-bottom:none}.meta{color:var(--muted);font-size:.92rem}.amt.income{color:#34d399}.amt.expense{color:#fb7185}
+    .empty{color:var(--muted);padding:10px 0}.footer{margin-top:18px;color:var(--muted);font-size:.9rem}
+    @media (max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr 1fr;}.row button{grid-column:1/-1}}
+    @media (max-width:520px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Finanz Tool</h1>
+        <div class="sub">Tracke Einkommen und Ausgaben direkt im Browser.</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div></div>
+      <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div></div>
+      <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div></div>
+      <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <input id="title" placeholder="Beschreibung z. B. Miete" />
+        <input id="amount" type="number" step="0.01" placeholder="Betrag" />
+        <select id="type"><option value="expense">Ausgabe</option><option value="income">Einnahme</option></select>
+        <button id="addBtn">Hinzufügen</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin-top:0">Transaktionen</h2>
+      <ul class="list" id="list"></ul>
+      <div class="footer">Die Daten bleiben über localStorage im Browser gespeichert.</div>
+    </div>
+  </div>
+
+  <script>
+    const balanceEl = document.getElementById('balance');
+    const incomeEl = document.getElementById('income');
+    const expenseEl = document.getElementById('expense');
+    const countEl = document.getElementById('count');
+    const listEl = document.getElementById('list');
+    const titleEl = document.getElementById('title');
+    const amountEl = document.getElementById('amount');
+    const typeEl = document.getElementById('type');
+    const addBtn = document.getElementById('addBtn');
+    const STORAGE_KEY = 'expense-tracker-items';
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
+    const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const render = () => {
+      const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
+      const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
+      const balance = income - expense;
+      balanceEl.textContent = eur(balance);
+      incomeEl.textContent = eur(income);
+      expenseEl.textContent = eur(expense);
+      countEl.textContent = items.length;
+      listEl.innerHTML = items.length ? '' : '<li class="empty">Noch keine Einträge vorhanden.</li>';
+      items.slice().reverse().forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = `<div><strong>${item.title}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div>`;
+        listEl.appendChild(li);
+      });
+    };
+    const addItem = () => {
+      const title = titleEl.value.trim();
+      const amount = Number(amountEl.value);
+      const type = typeEl.value;
+      if (!title || !amount || amount <= 0) return;
+      items.push({ id: crypto.randomUUID(), title, amount, type, date: new Date().toISOString() });
+      save();
+      titleEl.value = ''; amountEl.value = ''; titleEl.focus();
+      render();
+    };
+    addBtn.addEventListener('click', addItem);
+    [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); }));
+    render();
+  </script>
+</body>
+</html>
