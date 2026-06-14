@@ -1,28 +1,40 @@
+Hier ist der aktuelle Code für `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
-  <title>Expense Tracker</title>
+  <title>Finanz Tool</title>
   <style>
-    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--accent:#22c55e;--danger:#ef4444;--line:#1f2937;--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--safe-left:env(safe-area-inset-left);--safe-right:env(safe-area-inset-right)}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#0f172a,#111827);color:var(--text);min-height:100vh}
-    .wrap{max-width:980px;margin:0 auto;padding:calc(16px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left))}
-    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:24px}
-    h1{margin:0;font-size:clamp(2rem,4vw,3rem)} .sub{color:var(--muted);margin-top:8px}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0}
-    .card,.panel{background:rgba(17,24,39,.85);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    .card{padding:18px} .label{color:var(--muted);font-size:.9rem}.value{font-size:1.6rem;font-weight:700;margin-top:10px}
-    .panel{padding:18px;margin-top:16px}
-    .row{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:10px}
-    input,select,button{width:100%;border-radius:12px;border:1px solid #334155;background:#0b1220;color:var(--text);padding:14px 14px;font-size:16px;min-height:48px}
-    button{cursor:pointer;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;font-weight:700}
-    button:hover{filter:brightness(1.05)}
+    :root{--bg:#050816;--card:rgba(15,23,42,.55);--card2:rgba(255,255,255,.06);--text:#f8fafc;--muted:#a5b4fc;--line:rgba(255,255,255,.10);--c1:#8b5cf6;--c2:#22d3ee;--c3:#34d399;--c4:#fbbf24;--c5:#fb7185;--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--safe-left:env(safe-area-inset-left);--safe-right:env(safe-area-inset-right)}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at top left,rgba(139,92,246,.35),transparent 24%),radial-gradient(circle at top right,rgba(34,211,238,.22),transparent 20%),radial-gradient(circle at 50% 100%,rgba(251,191,36,.18),transparent 25%),linear-gradient(180deg,#050816,#0b1020 45%,#10172a)}
+    body::before{content:'';position:fixed;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.04),transparent 35%,rgba(255,255,255,.02));pointer-events:none}
+    .wrap{max-width:1080px;margin:0 auto;padding:calc(18px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left))}
+    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
+    h1{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.04em;line-height:.95} .sub{color:#c7d2fe;margin-top:10px;font-size:1rem;max-width:52ch}
+    .topline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chip{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);font-weight:700;font-size:.92rem}
+    .grid{display:grid;grid-template-columns:1.2fr 1fr 1fr .9fr;gap:14px;margin:18px 0 22px}
+    .card,.panel{background:linear-gradient(180deg,rgba(15,23,42,.68),rgba(15,23,42,.42));border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 60px rgba(0,0,0,.38);backdrop-filter:blur(24px);overflow:hidden}
+    .card{padding:18px;position:relative;isolation:isolate}.card::after{content:'';position:absolute;inset:auto -35px -35px auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 65%);filter:blur(2px);opacity:.55;z-index:-1}
+    .card:nth-child(1){border-color:rgba(139,92,246,.35)}.card:nth-child(2){border-color:rgba(34,211,238,.28)}.card:nth-child(3){border-color:rgba(251,191,36,.28)}.card:nth-child(4){border-color:rgba(52,211,153,.28)}
+    .label{color:#cbd5e1;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}.value{font-size:1.9rem;font-weight:900;margin-top:12px}.trend{margin-top:10px;font-size:.92rem;color:#dbeafe;opacity:.9}
+    .panel{padding:18px}
+    .row{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px}
+    input,select,button{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(2,6,23,.62);color:var(--text);padding:14px 14px;font-size:16px;min-height:52px;outline:none}
+    input::placeholder{color:#94a3b8} input:focus,select:focus{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 4px rgba(34,211,238,.12)}
+    button{cursor:pointer;border:none;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399);box-shadow:0 16px 30px rgba(34,211,238,.18);transform:translateY(0);transition:.18s ease}
+    button:hover{transform:translateY(-1px);filter:saturate(1.06)}
+    .quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.qbtn{padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
+    .content{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+    .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h2{margin:0;font-size:1.1rem}
     .list{margin:0;padding:0;list-style:none}.item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
-    .item:last-child{border-bottom:none}.meta{color:var(--muted);font-size:.92rem}.amt.income{color:#34d399}.amt.expense{color:#fb7185}
-    .empty{color:var(--muted);padding:10px 0}.footer{margin-top:18px;color:var(--muted);font-size:.9rem}
-    @media (max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr 1fr;}.row button{grid-column:1/-1}}
-    @media (max-width:520px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.card,.panel{border-radius:16px}}
+    .item:last-child{border-bottom:none}.left{display:flex;align-items:center;gap:12px;min-width:0}.badge{display:inline-flex;align-items:center;justify-content:center;min-width:112px;padding:9px 12px;border-radius:999px;font-size:.86rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 10px 20px rgba(0,0,0,.18)}.meta{color:#cbd5e1;font-size:.9rem;margin-top:4px}.amt.income{color:#86efac;font-weight:900}.amt.expense{color:#fda4af;font-weight:900}
+    .empty{color:#94a3b8;padding:10px 0}.chart{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:230px;margin-top:12px;padding-top:4px}.barwrap{display:flex;flex-direction:column;align-items:center;gap:8px}.bar{width:100%;min-height:18px;border-radius:16px 16px 8px 8px;box-shadow:0 14px 28px rgba(0,0,0,.22)}.barlabel{font-size:.78rem;color:#cbd5e1;text-align:center;line-height:1.2}
+    .footer{margin-top:16px;color:#94a3b8;font-size:.9rem}
+    @media (max-width:980px){.grid,.content{grid-template-columns:1fr 1fr}.content{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}}
   </style>
 </head>
 <body>
@@ -30,63 +42,110 @@
     <div class="hero">
       <div>
         <h1>Finanz Tool</h1>
-        <div class="sub">Tracke Einkommen und Ausgaben direkt im Browser.</div>
+        <div class="sub">Ein hochwertiges, ruhiges Dashboard zum Tracken deiner Ausgaben — klar, schnell und iPhone-freundlich.</div>
+        <div class="topline">
+          <div class="chip">⚡ Quick Add</div>
+          <div class="chip">🎨 Premium UI</div>
+          <div class="chip">📱 Optimiert für iPhone</div>
+        </div>
       </div>
+      <div class="chip">💾 localStorage</div>
     </div>
 
     <div class="grid">
-      <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div></div>
-      <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div></div>
-      <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div></div>
-      <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div></div>
+      <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div><div class="trend" id="balanceTrend">Alles im grünen Bereich</div></div>
+      <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div><div class="trend">Gesamte Geldeingänge</div></div>
+      <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div><div class="trend">Deine Kosten im Blick</div></div>
+      <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div><div class="trend">Alle Buchungen</div></div>
     </div>
 
     <div class="panel">
+      <div class="sectiontitle"><h2>Schneller Eintrag</h2><span class="chip">1-Tap Kategorien</span></div>
       <div class="row">
-        <input id="title" placeholder="Beschreibung z. B. Miete" />
+        <select id="title">
+          <option value="" selected disabled>Beschreibung wählen</option>
+          <option value="Tanken">Tanken</option>
+          <option value="Einkaufen">Einkaufen</option>
+          <option value="Sonstiges">Sonstiges</option>
+          <option value="Unternehmungen">Unternehmungen</option>
+          <option value="Kaufrausch">Kaufrausch</option>
+        </select>
         <input id="amount" type="number" step="0.01" placeholder="Betrag" />
         <select id="type"><option value="expense">Ausgabe</option><option value="income">Einnahme</option></select>
         <button id="addBtn">Hinzufügen</button>
       </div>
+      <div class="quick">
+        <button class="qbtn" data-cat="Tanken">⛽ Tanken</button>
+        <button class="qbtn" data-cat="Einkaufen">🛒 Einkaufen</button>
+        <button class="qbtn" data-cat="Unternehmungen">🎉 Unternehmungen</button>
+        <button class="qbtn" data-cat="Kaufrausch">🛍️ Kaufrausch</button>
+        <button class="qbtn" data-cat="Sonstiges">✨ Sonstiges</button>
+      </div>
     </div>
 
-    <div class="panel">
-      <h2 style="margin-top:0">Transaktionen</h2>
-      <ul class="list" id="list"></ul>
-      <div class="footer">Die Daten bleiben über localStorage im Browser gespeichert.</div>
+    <div class="content">
+      <div class="panel">
+        <div class="sectiontitle"><h2>Transaktionen</h2><span class="chip" id="latestCount">0 Buchungen</span></div>
+        <ul class="list" id="list"></ul>
+        <div class="footer">Die Daten bleiben im Browser gespeichert.</div>
+      </div>
+      <div class="panel">
+        <div class="sectiontitle"><h2>Kategorie Chart</h2><span class="chip">Ausgaben</span></div>
+        <div class="chart" id="chart"></div>
+      </div>
     </div>
   </div>
 
   <script>
     const balanceEl = document.getElementById('balance');
+    const balanceTrendEl = document.getElementById('balanceTrend');
     const incomeEl = document.getElementById('income');
     const expenseEl = document.getElementById('expense');
     const countEl = document.getElementById('count');
+    const latestCountEl = document.getElementById('latestCount');
     const listEl = document.getElementById('list');
+    const chartEl = document.getElementById('chart');
     const titleEl = document.getElementById('title');
     const amountEl = document.getElementById('amount');
     const typeEl = document.getElementById('type');
     const addBtn = document.getElementById('addBtn');
     const STORAGE_KEY = 'expense-tracker-items';
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
+    const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
+    const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const renderChart = () => {
+      const totals = Object.fromEntries(cats.map(c=>[c,0]));
+      items.filter(i=>i.type==='expense').forEach(i=>{ if(totals[i.title] != null) totals[i.title] += i.amount; });
+      const max = Math.max(...Object.values(totals), 1);
+      chartEl.innerHTML = '';
+      cats.forEach(cat => {
+        const h = Math.max(16, (totals[cat] / max) * 160);
+        const div = document.createElement('div');
+        div.className = 'barwrap';
+        div.innerHTML = `<div class="bar" style="height:${h}px;background:${colors[cat]}"></div><div class="barlabel">${cat}<br>${eur(totals[cat])}</div>`;
+        chartEl.appendChild(div);
+      });
+    };
     const render = () => {
       const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
       const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
       const balance = income - expense;
       balanceEl.textContent = eur(balance);
+      balanceTrendEl.textContent = balance >= 0 ? 'Sieht stabil aus' : 'Achte auf deine Ausgaben';
       incomeEl.textContent = eur(income);
       expenseEl.textContent = eur(expense);
       countEl.textContent = items.length;
+      latestCountEl.textContent = `${items.length} Buchungen`;
       listEl.innerHTML = items.length ? '' : '<li class="empty">Noch keine Einträge vorhanden.</li>';
       items.slice().reverse().forEach(item => {
         const li = document.createElement('li');
         li.className = 'item';
-        li.innerHTML = `<div><strong>${item.title}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div>`;
+        li.innerHTML = `<div class="left"><div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div><div><strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div></div><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div>`;
         listEl.appendChild(li);
       });
+      renderChart();
     };
     const addItem = () => {
       const title = titleEl.value.trim();
@@ -100,7 +159,9 @@
     };
     addBtn.addEventListener('click', addItem);
     [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); }));
+    document.querySelectorAll('.qbtn').forEach(btn => btn.addEventListener('click', () => { titleEl.value = btn.dataset.cat; amountEl.focus(); }));
     render();
   </script>
 </body>
 </html>
+```
