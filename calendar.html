@@ -20,7 +20,6 @@ button{cursor:pointer;background:linear-gradient(135deg,#60a5fa,#6ee7b7);font-we
 </style>
 </head>
 <body>
-<div style="position:sticky;top:0;z-index:50;padding:12px 16px;background:rgba(7,17,31,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)"><a href="index.html" style="display:inline-block;padding:10px 14px;border-radius:12px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.28);color:#dfefff;text-decoration:none;font-weight:800">← Zurück zur Startseite</a></div>
 <div class="wrap">
   <h1 class="title">Kalender</h1>
   <p class="subtitle">Klicke auf einen Tag, schreibe eine Notiz oder Erinnerung hinein, und sie bleibt im Browser gespeichert. So kann Janiks Life Changing Tool dich später daran erinnern, sobald du diese Seite wieder öffnest.</p>
@@ -61,16 +60,14 @@ const nextBtn=document.getElementById('nextBtn');
 const dow=['So','Mo','Di','Mi','Do','Fr','Sa'];
 const months=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 let now=new Date(); let viewYear=now.getFullYear(); let viewMonth=now.getMonth(); let selectedKey='';
-const storeKey='janiks_life_changing_tool_calendar';
+const storeKey='janiks_life_changing_tool_calendar'; const homeKey='janiks_life_changing_tool_home_reminders';
 const data=JSON.parse(localStorage.getItem(storeKey)||'{}');
 function key(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
-function save(){localStorage.setItem(storeKey,JSON.stringify(data));}
+function save(){localStorage.setItem(storeKey,JSON.stringify(data)); const reminders=Object.entries(data).map(([date,v])=>({date,title:v.title,text:v.text})).filter(x=>x.title||x.text); localStorage.setItem(homeKey,JSON.stringify(reminders));}
 function render(){calendar.innerHTML=''; monthLabel.textContent=`${months[viewMonth]} ${viewYear}`; dow.forEach(d=>{const el=document.createElement('div');el.className='dow';el.textContent=d;calendar.appendChild(el)}); const first=new Date(viewYear,viewMonth,1); const start=first.getDay(); const days=new Date(viewYear,viewMonth+1,0).getDate(); for(let i=0;i<start;i++){const e=document.createElement('div'); e.className='day'; e.style.opacity=.25; calendar.appendChild(e)} for(let d=1; d<=days; d++){const k=key(viewYear,viewMonth,d); const e=document.createElement('div'); e.className='day'; if(data[k]) e.classList.add('hasnote'); if(k===selectedKey) e.classList.add('selected'); if(viewYear===now.getFullYear()&&viewMonth===now.getMonth()&&d===now.getDate()) e.classList.add('today'); e.innerHTML=`<div class="num">${d}</div><div class="muted">${data[k]?.title||''}</div>`; e.onclick=()=>selectDate(viewYear,viewMonth,d); calendar.appendChild(e)} renderNotes(); }
 function selectDate(y,m,d){selectedKey=key(y,m,d); selectedLabel.textContent=`Ausgewählt: ${d}. ${months[m]} ${y}`; noteTitle.value=data[selectedKey]?.title||''; noteText.value=data[selectedKey]?.text||''; render(); }
 function renderNotes(){dayNotes.innerHTML=selectedKey&&data[selectedKey]?`<div class="note-item"><strong>${data[selectedKey].title||'Ohne Titel'}</strong><div class="muted" style="margin-top:6px">${data[selectedKey].text||''}</div></div>`:'<div class="muted">Keine Einträge für diesen Tag.</div>'}
-saveBtn.onclick=()=>{if(!selectedKey)return; data[selectedKey]={title:noteTitle.value.trim(), text:noteText.value.trim()}; save(); render();};
-prevBtn.onclick=()=>{viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} render();}; nextBtn.onclick=()=>{viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} render();};
-render();
+saveBtn.onclick=()=>{if(!selectedKey)return; data[selectedKey]={title:noteTitle.value.trim(), text:noteText.value.trim()}; save(); render();}; prevBtn.onclick=()=>{viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} render();}; nextBtn.onclick=()=>{viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} render();}; render();
 </script>
 </body>
 </html>
