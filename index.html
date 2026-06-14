@@ -133,8 +133,9 @@
     <div class="tab-panel" id="fixkostenTab">
       <div class="panel">
         <div class="panel-head">
-          <div class="sectiontitle" style="margin:0"><h2>Fixkosten jährlich</h2><span class="chip">Kategorie wählen + Betrag</span></div>
+          <div class="sectiontitle" style="margin:0"><h2>Kategorien</h2><span class="chip">Tippen zum Bearbeiten</span></div>
           <div class="smallrow">
+            <button id="openCatManagerBtn">Kategorien bearbeiten</button>
             <button id="addYearRowBtn">+ Zeile hinzufügen</button>
             <button id="yearUndoBtn">↩️ Undo letzte Änderung</button>
           </div>
@@ -151,6 +152,20 @@
           </table>
         </div>
         <div class="footer">Klicke auf eine Zelle, um Kategorie und Betrag zu bearbeiten. Mit x löscht du die Zeile.</div>
+      </div>
+
+      <div id="catManagerModal" class="keypad-modal" aria-hidden="true">
+        <div class="keypad-sheet">
+          <div class="keypad-head">
+            <strong>Kategorien bearbeiten</strong>
+            <button type="button" id="closeCatManager" class="pad-close">✕</button>
+          </div>
+          <div class="smallrow" style="margin-bottom:10px">
+            <input id="newCategoryName" class="mini" placeholder="Kategorie hinzufügen">
+            <button type="button" id="addCategoryBtn">+</button>
+          </div>
+          <div id="catManagerList" style="display:grid;gap:10px;max-height:360px;overflow:auto"></div>
+        </div>
       </div>
 
       <div id="fixedModal" class="keypad-modal" aria-hidden="true">
@@ -206,6 +221,12 @@
     const addFixedCategoryBtn = document.getElementById('addFixedCategoryBtn');
     const addYearRowBtn = document.getElementById('addYearRowBtn');
     const yearUndoBtn = document.getElementById('yearUndoBtn');
+    const openCatManagerBtn = document.getElementById('openCatManagerBtn');
+    const catManagerModal = document.getElementById('catManagerModal');
+    const closeCatManager = document.getElementById('closeCatManager');
+    const newCategoryName = document.getElementById('newCategoryName');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const catManagerList = document.getElementById('catManagerList');
 
     const STORAGE_KEY = 'expense-tracker-items';
     const fixedKey = 'fixed-costs-items';
@@ -215,12 +236,13 @@
     let history = [];
     let padValue = '';
     const fixedColors = ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'];
-    const fixedCategoriesDefault = ['Versicherung','Auto','Autosteuer','Autoversicherung','GEZ','Urlaub','Nebenkosten'];
+    const fixedCategoriesDefault = ['Auto','Autoversicherung','Autosteuer','GEZ','Urlaub','Versicherung'];
 
     let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
+    let categoryOptions = JSON.parse(localStorage.getItem('yearly-category-options') || '[]');
     if (!fixedRows.length) fixedRows = fixedCategoriesDefault.map((name, i) => ({id:crypto.randomUUID(), name, color:fixedColors[i % fixedColors.length], months:Array(12).fill(''), category:name}));
+    if (!categoryOptions.length) categoryOptions = fixedCategoriesDefault.slice();
     fixedRows = fixedRows.map((r, i) => ({...r, id:r.id || crypto.randomUUID(), color:r.color || fixedColors[i % fixedColors.length], months:r.months || Array(12).fill(''), category:r.category || r.name}));
-
     let fixedHistory = JSON.parse(localStorage.getItem(fixedHistoryKey) || '[]');
 
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
@@ -230,6 +252,7 @@
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     const saveFixed = () => localStorage.setItem(fixedKey, JSON.stringify(fixedRows));
     const saveFixedHistory = () => localStorage.setItem(fixedHistoryKey, JSON.stringify(fixedHistory));
+    const saveCategories = () => localStorage.setItem('yearly-category-options', JSON.stringify(categoryOptions));
     const snapshotFixed = () => { fixedHistory.push(JSON.stringify(fixedRows)); saveFixedHistory(); };
 
     const openPad = () => { padValue = amountEl.value.replace('.', ','); padDisplay.value = padValue; keypadModal.classList.add('open'); keypadModal.setAttribute('aria-hidden','false'); };
@@ -253,7 +276,10 @@
     let activeFixed = null;
 
     function renderFixedSelect(){
-      fixedCategorySelect.innerHTML = fixedRows.map((r, i) => `<option value="${i}">${r.name}</option>`).join('') + '<option value="new">+ frei benennen</option>';
+      fixedCategorySelect.innerHTML = categoryOptions.map((c, i) => `<option value="${c}">${c}</option>`).join('') + '<option value="new">+ frei benennen</option>';
+    }
+    function renderCatManager(){
+      catManagerList.innerHTML = categoryOptions.map((c, i) => `<div class="smallrow"><input class="mini" data-catidx="${i}" value="${c}"><button class="delbtn" data-del-cat="${i}">x</button></div>`).join('');
     }
 
     function renderFixed(){
@@ -261,7 +287,7 @@
       fixedRows.forEach((row, rIndex) => {
         const tr = document.createElement('tr');
         tr.dataset.row = rIndex;
-        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</span></td>`];
+        const cells = [`<td class="catcell"><button class="catbox" data-act="editcat" data-r="${rIndex}" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</button><button class="delbtn" data-act="delrow" data-r="${rIndex}" style="position:absolute;top:6px;right:6px;width:30px;min-width:30px;min-height:30px;border-radius:10px;font-size:.85rem">x</button></td>`];
         for (let i=0;i<12;i++) {
           const val = row.months[i] || '';
           cells.push(`<td><div class="cellbox" data-r="${rIndex}" data-c="${i}" style="border-color:${val ? row.color : 'transparent'};box-shadow:${val ? '0 0 0 2px ' + row.color + '66 inset' : 'none'}"><span class="cellvalue">${val ? eur(n(val)) : ''}</span><div class="cellactions"><button class="tiny add" data-act="edit" data-r="${rIndex}" data-c="${i}">+</button><button class="tiny del" data-act="delcell" data-r="${rIndex}" data-c="${i}">x</button></div></div></td>`);
@@ -307,7 +333,7 @@
       activeFixed = {r, c};
       const row = fixedRows[r];
       fixedCatTitle.textContent = row.name + ' · Monat ' + (c + 1);
-      fixedCategorySelect.value = String(r);
+      fixedCategorySelect.value = row.category || row.name;
       fixedPadDisplay.value = row.months[c] || '';
       fixedModal.classList.add('open');
       fixedModal.setAttribute('aria-hidden','false');
@@ -316,6 +342,7 @@
     function addFixedRow(name='Neue Kategorie'){
       pushFixedSnapshot();
       fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name});
+      if (!categoryOptions.includes(name)) { categoryOptions.push(name); saveCategories(); }
       saveFixed();
       renderFixed();
       render();
@@ -336,10 +363,11 @@
       if (idx == null || Number.isNaN(idx)) return;
       pushFixedSnapshot();
       const amount = fixedPadDisplay.value.trim();
-      const cat = fixedCategorySelect.value === 'new' ? (newFixedCategoryName.value.trim() || 'Neue Kategorie') : fixedRows[idx].name;
+      const cat = fixedCategorySelect.value === 'new' ? (newFixedCategoryName.value.trim() || 'Neue Kategorie') : fixedCategorySelect.value;
       fixedRows[idx].name = cat;
       fixedRows[idx].category = cat;
       fixedRows[idx].months[activeFixed.c] = amount;
+      if (!categoryOptions.includes(cat) && cat !== 'Neue Kategorie') { categoryOptions.push(cat); saveCategories(); }
       saveFixed();
       renderFixed();
       render();
@@ -399,10 +427,14 @@
     confirmPad.addEventListener('click', () => { syncPad(); closePadFn(); amountEl.focus(); });
 
     fixedBody.addEventListener('click', e => {
+      const rowDel = e.target.closest('[data-act="delrow"]');
+      if (rowDel) { deleteFixedRow(+rowDel.dataset.r); return; }
       const delCell = e.target.closest('[data-act="delcell"]');
       if (delCell) { deleteFixedCell(+delCell.dataset.r, +delCell.dataset.c); return; }
       const editCell = e.target.closest('[data-act="edit"]');
       if (editCell) { openFixedEditor(+editCell.dataset.r, +editCell.dataset.c); return; }
+      const catEdit = e.target.closest('[data-act="editcat"]');
+      if (catEdit) { openFixedEditor(+catEdit.dataset.r, 0); return; }
       const box = e.target.closest('.cellbox');
       if (!box) return;
       openFixedEditor(+box.dataset.r, +box.dataset.c);
@@ -410,8 +442,14 @@
 
     fixedModal.addEventListener('click', e => { if (e.target === fixedModal) { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); } });
     closeFixedPad.addEventListener('click', () => { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); });
-    fixedCategorySelect.addEventListener('change', () => { if (fixedCategorySelect.value === 'new') newFixedCategoryName.focus(); else { const row = fixedRows[+fixedCategorySelect.value]; if (row) fixedCatTitle.textContent = row.name; } });
-    addFixedCategoryBtn.addEventListener('click', () => { const name = newFixedCategoryName.value.trim(); if (!name) return; pushFixedSnapshot(); fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name}); saveFixed(); renderFixed(); render(); newFixedCategoryName.value=''; fixedCategorySelect.value = String(fixedRows.length - 1); });
+    openCatManagerBtn.addEventListener('click', () => { renderCatManager(); catManagerModal.classList.add('open'); });
+    closeCatManager.addEventListener('click', () => { catManagerModal.classList.remove('open'); });
+    catManagerModal.addEventListener('click', e => { if (e.target === catManagerModal) catManagerModal.classList.remove('open'); });
+    catManagerList.addEventListener('input', e => { const i = e.target.dataset.catidx; if (i == null) return; categoryOptions[i] = e.target.value; saveCategories(); renderFixedSelect(); renderFixed(); });
+    catManagerList.addEventListener('click', e => { const d = e.target.closest('[data-del-cat]'); if (!d) return; const i = +d.dataset.delCat; categoryOptions.splice(i,1); saveCategories(); renderCatManager(); renderFixedSelect(); renderFixed(); });
+    addCategoryBtn.addEventListener('click', () => { const name = newCategoryName.value.trim(); if (!name) return; categoryOptions.push(name); saveCategories(); newCategoryName.value=''; renderCatManager(); renderFixedSelect(); });
+    fixedCategorySelect.addEventListener('change', () => { if (fixedCategorySelect.value === 'new') newFixedCategoryName.focus(); else { fixedCatTitle.textContent = fixedCategorySelect.value; } });
+    addFixedCategoryBtn.addEventListener('click', () => { const name = newFixedCategoryName.value.trim(); if (!name) return; pushFixedSnapshot(); fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name}); if (!categoryOptions.includes(name)) { categoryOptions.push(name); saveCategories(); } saveFixed(); renderFixed(); render(); newFixedCategoryName.value=''; fixedCategorySelect.value = name; });
     saveFixedPad.addEventListener('click', commitFixedEdit);
     addYearRowBtn.addEventListener('click', () => addFixedRow('Neue Kategorie'));
     yearUndoBtn.addEventListener('click', undoFixed);
@@ -420,6 +458,7 @@
     tabBtns.forEach(btn => btn.addEventListener('click', () => { tabBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; dashboardTab.classList.toggle('active', tab === 'dashboard'); fixkostenTab.classList.toggle('active', tab === 'fixkosten'); }));
 
     renderFixedSelect();
+    renderCatManager();
     renderFixed();
     render();
   </script>
