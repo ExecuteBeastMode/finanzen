@@ -28,7 +28,7 @@
     .quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.qbtn{padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
     .content{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
     .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h2{margin:0;font-size:1.1rem}
-    .list{margin:0;padding:0;list-style:none}.item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+    .list{margin:0;padding:0;list-style:none}.item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}.delbtn{width:38px;min-width:38px;min-height:38px;border-radius:12px;background:rgba(251,113,133,.18);border:1px solid rgba(251,113,133,.35);box-shadow:none;padding:0;font-size:1rem}
     .item:last-child{border-bottom:none}.left{display:flex;align-items:center;gap:12px;min-width:0}.badge{display:inline-flex;align-items:center;justify-content:center;min-width:112px;padding:9px 12px;border-radius:999px;font-size:.86rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 10px 20px rgba(0,0,0,.18)}.meta{color:#cbd5e1;font-size:.9rem;margin-top:4px}.amt.income{color:#86efac;font-weight:900}.amt.expense{color:#fda4af;font-weight:900}
     .empty{color:#94a3b8;padding:10px 0}.chart{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:230px;margin-top:12px;padding-top:4px}.barwrap{display:flex;flex-direction:column;align-items:center;gap:8px}.bar{width:100%;min-height:18px;border-radius:16px 16px 8px 8px;box-shadow:0 14px 28px rgba(0,0,0,.22)}.barlabel{font-size:.78rem;color:#cbd5e1;text-align:center;line-height:1.2}
     .footer{margin-top:16px;color:#94a3b8;font-size:.9rem}
@@ -214,10 +214,14 @@
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let history = [];
     let padValue = '';
-    const fixedCats = ['Auto','Autosteuer','Auto Versicherung','GEZ','Versicherung','Urlaub','Auto Reperatur','Frei'];
+    const fixedGroups = [
+      {name:'Wohnen', items:[{name:'Miete'},{name:'Strom'},{name:'Internet'},{name:'Heizung'}]},
+      {name:'Mobilität', items:[{name:'Auto'},{name:'Autosteuer'},{name:'Auto Versicherung'},{name:'Auto Reperatur'}]},
+      {name:'Konsum', items:[{name:'GEZ'},{name:'Versicherung'},{name:'Urlaub'},{name:'Frei'}]}
+    ];
     const fixedColors = ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'];
     let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
-    if (!fixedRows.length) fixedRows = fixedCats.map((name, i) => ({name, color: fixedColors[i], months:Array(12).fill('')}));
+    if (!fixedRows.length) fixedRows = fixedGroups.flatMap(g => g.items.map((it, i) => ({group:g.name,name:it.name,color:fixedColors[(i + g.name.length) % fixedColors.length],months:Array(12).fill('')})));
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
     const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
@@ -241,11 +245,12 @@
       });
     };
     let activeFixed = null;
+    const renderLegend = () => { legendGrid.innerHTML = fixedRows.map(r => `<div class="legend-item"><span class="swatch" style="background:${r.color || '#64748b'}"></span>${r.group} · ${r.name}</div>`).join(''); };
     const renderFixed = () => {
       fixedBody.innerHTML = '';
       fixedRows.forEach((row, rIndex) => {
         const tr = document.createElement('tr');
-        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name}</span></td>`];
+        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.group} · ${row.name}</span></td>`];
         for (let i=0;i<12;i++) cells.push(`<td><input readonly class="fixed-input" data-r="${rIndex}" data-c="${i}" value="${row.months[i] || ''}"></td>`);
         const yearly = row.months.reduce((s,v)=>s+n(v),0);
         cells.push(`<td data-year="${rIndex}">${eur(yearly)}</td>`);
@@ -259,13 +264,13 @@
       yearTotalEl.textContent = eur(totalYear);
       renderLegend();
     };
-    const renderLegend = () => { legendGrid.innerHTML = fixedRows.map(r => `<div class="legend-item"><span class="swatch" style="background:${r.color || '#64748b'}"></span>${r.name}</div>`).join(''); };
     const render = () => {
       const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
       const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
-      const balance = income - expense;
+      const monthlyFixed = fixedRows.reduce((s,row)=>s + row.months.reduce((a,v)=>a+n(v),0)/12, 0);
+      const balance = income - expense - monthlyFixed;
       balanceEl.textContent = eur(balance);
-      balanceTrendEl.textContent = balance >= 0 ? 'Sieht stabil aus' : 'Achte auf deine Ausgaben';
+      balanceTrendEl.textContent = balance >= 0 ? 'Nach Fixkosten stabil' : 'Achte auf deine Fixkosten';
       incomeEl.textContent = eur(income);
       expenseEl.textContent = eur(expense);
       countEl.textContent = items.length;
@@ -274,7 +279,7 @@
       items.slice().reverse().forEach(item => {
         const li = document.createElement('li');
         li.className = 'item';
-        li.innerHTML = `<div class="left"><div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div><div><strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div></div><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div>`;
+        li.innerHTML = `<div class="left"><div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div><div><strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div></div><div style="display:flex;align-items:center;gap:10px"><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div><button class="delbtn" data-id="${item.id}">x</button></div>`;
         listEl.appendChild(li);
       });
       renderChart();
@@ -310,7 +315,7 @@
       if (!cell) return;
       activeFixed = {r:+cell.dataset.r, c:+cell.dataset.c};
       const row = fixedRows[activeFixed.r];
-      fixedCatTitle.textContent = row.name + ' · Monat ' + (activeFixed.c+1);
+      fixedCatTitle.textContent = row.group + ' · ' + row.name + ' · Monat ' + (activeFixed.c+1);
       fixedPadDisplay.value = row.months[activeFixed.c] || '';
       fixedModal.classList.add('open');
       fixedModal.setAttribute('aria-hidden','false');
@@ -325,11 +330,17 @@
         if (!fixedPadDisplay.value.includes(',') && !fixedPadDisplay.value.includes('.')) fixedPadDisplay.value += ',';
       } else fixedPadDisplay.value += t;
     }));
+    document.querySelectorAll('.preset-btn').forEach(b => b.addEventListener('click', () => {
+      const p = b.dataset.preset;
+      const base = fixedPadDisplay.value.replace(/[,\.].*$/, '');
+      fixedPadDisplay.value = base + p;
+    }));
     saveFixedPad.addEventListener('click', () => {
       if (!activeFixed) return;
       fixedRows[activeFixed.r].months[activeFixed.c] = fixedPadDisplay.value;
       saveFixed();
       renderFixed();
+      render();
       fixedModal.classList.remove('open');
       fixedModal.setAttribute('aria-hidden','true');
     });
@@ -338,7 +349,14 @@
       if (r == null || c == null) return;
       if (c === 'name') fixedRows[r].name = e.target.value;
       else fixedRows[r].months[c] = e.target.value;
-      saveFixed(); renderFixed();
+      saveFixed(); renderFixed(); render();
+    });
+    fixedBody.addEventListener('click', e => {
+      const b = e.target.closest('.delbtn');
+      if (!b) return;
+      items = items.filter(x => x.id !== b.dataset.id);
+      save();
+      render();
     });
     tabBtns.forEach(btn => btn.addEventListener('click', () => {
       tabBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
