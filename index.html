@@ -214,14 +214,14 @@
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let history = [];
     let padValue = '';
-    const fixedGroups = [
-      {name:'Wohnen', items:[{name:'Miete'},{name:'Strom'},{name:'Internet'},{name:'Heizung'}]},
-      {name:'Mobilität', items:[{name:'Auto'},{name:'Autosteuer'},{name:'Auto Versicherung'},{name:'Auto Reperatur'}]},
-      {name:'Konsum', items:[{name:'GEZ'},{name:'Versicherung'},{name:'Urlaub'},{name:'Frei'}]}
-    ];
-    const fixedColors = ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'];
     let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
-    if (!fixedRows.length) fixedRows = fixedGroups.flatMap(g => g.items.map((it, i) => ({group:g.name,name:it.name,color:fixedColors[(i + g.name.length) % fixedColors.length],months:Array(12).fill('')})));
+    if (!fixedRows.length) fixedRows = [
+      {name:'Miete', months:Array(12).fill('')},
+      {name:'Strom', months:Array(12).fill('')},
+      {name:'Internet', months:Array(12).fill('')},
+      {name:'Heizung', months:Array(12).fill('')}
+    ];
+    fixedRows = fixedRows.map((r,i)=>({...r,color:r.color || ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'][i % 8]}));
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
     const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
@@ -245,12 +245,12 @@
       });
     };
     let activeFixed = null;
-    const renderLegend = () => { legendGrid.innerHTML = fixedRows.map(r => `<div class="legend-item"><span class="swatch" style="background:${r.color || '#64748b'}"></span>${r.group} · ${r.name}</div>`).join(''); };
+    const renderLegend = () => { legendGrid.innerHTML = fixedRows.map(r => `<div class="legend-item"><span class="swatch" style="background:${r.color || '#64748b'}"></span>${r.name}</div>`).join(''); };
     const renderFixed = () => {
       fixedBody.innerHTML = '';
       fixedRows.forEach((row, rIndex) => {
         const tr = document.createElement('tr');
-        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.group} · ${row.name}</span></td>`];
+        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name}</span></td>`];
         for (let i=0;i<12;i++) cells.push(`<td><input readonly class="fixed-input" data-r="${rIndex}" data-c="${i}" value="${row.months[i] || ''}"></td>`);
         const yearly = row.months.reduce((s,v)=>s+n(v),0);
         cells.push(`<td data-year="${rIndex}">${eur(yearly)}</td>`);
@@ -315,7 +315,7 @@
       if (!cell) return;
       activeFixed = {r:+cell.dataset.r, c:+cell.dataset.c};
       const row = fixedRows[activeFixed.r];
-      fixedCatTitle.textContent = row.group + ' · ' + row.name + ' · Monat ' + (activeFixed.c+1);
+      fixedCatTitle.textContent = row.name + ' · Monat ' + (activeFixed.c+1);
       fixedPadDisplay.value = row.months[activeFixed.c] || '';
       fixedModal.classList.add('open');
       fixedModal.setAttribute('aria-hidden','false');
@@ -351,7 +351,7 @@
       else fixedRows[r].months[c] = e.target.value;
       saveFixed(); renderFixed(); render();
     });
-    fixedBody.addEventListener('click', e => {
+    listEl.addEventListener('click', e => {
       const b = e.target.closest('.delbtn');
       if (!b) return;
       items = items.filter(x => x.id !== b.dataset.id);
