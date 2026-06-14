@@ -12,6 +12,8 @@
     .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
     h1{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.04em;line-height:.95} .sub{color:#c7d2fe;margin-top:10px;font-size:1rem;max-width:52ch}
     .topline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chip{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);font-weight:700;font-size:.92rem}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}.tab-btn{padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);cursor:pointer}.tab-btn.active{background:linear-gradient(135deg,#8b5cf6,#22d3ee);box-shadow:0 14px 24px rgba(34,211,238,.18)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
     .grid{display:grid;grid-template-columns:1.2fr 1fr 1fr .9fr;gap:14px;margin:18px 0 22px}
     .card,.panel{background:linear-gradient(180deg,rgba(15,23,42,.68),rgba(15,23,42,.42));border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 60px rgba(0,0,0,.38);backdrop-filter:blur(24px);overflow:hidden}
     .card{padding:18px;position:relative;isolation:isolate}.card::after{content:'';position:absolute;inset:auto -35px -35px auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 65%);filter:blur(2px);opacity:.55;z-index:-1}
@@ -35,6 +37,7 @@
     .keypad-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.pad-close{width:42px;min-height:42px;border-radius:12px;background:rgba(255,255,255,.06)}
     .pad-display{width:100%;font-size:1.7rem;font-weight:900;text-align:right;padding:14px 16px;margin-bottom:12px;border-radius:18px;background:rgba(255,255,255,.05)}
     .pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.pad-key{min-height:64px;font-size:1.35rem;background:rgba(255,255,255,.06)}.pad-action{background:rgba(139,92,246,.28)}.pad-confirm{margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399)}
+    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td input{width:100%;min-width:72px;text-align:center;border-radius:12px;padding:10px 8px}.fixed-table .namecell{text-align:left;font-weight:800}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}
     @media (max-width:980px){.grid,.content{grid-template-columns:1fr 1fr}.content{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}}
   </style>
@@ -54,64 +57,89 @@
       <div class="chip">💾 localStorage</div>
     </div>
 
-    <div class="grid">
-      <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div><div class="trend" id="balanceTrend">Alles im grünen Bereich</div></div>
-      <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div><div class="trend">Gesamte Geldeingänge</div></div>
-      <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div><div class="trend">Deine Kosten im Blick</div></div>
-      <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div><div class="trend">Alle Buchungen</div></div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="fixkosten">Fixkosten jährlich</button>
     </div>
 
-    <div class="panel">
-      <div class="sectiontitle"><h2>Schneller Eintrag</h2><span class="chip">1-Tap Kategorien</span></div>
-      <div class="row">
-        <select id="title">
-          <option value="" selected disabled>Beschreibung wählen</option>
-          <option value="Tanken">Tanken</option>
-          <option value="Einkaufen">Einkaufen</option>
-          <option value="Sonstiges">Sonstiges</option>
-          <option value="Unternehmungen">Unternehmungen</option>
-          <option value="Kaufrausch">Kaufrausch</option>
-        </select>
-        <input id="amount" type="text" inputmode="decimal" placeholder="Betrag" readonly />
-        <select id="type"><option value="expense">Ausgabe</option><option value="income">Einnahme</option></select>
-        <button id="addBtn">Hinzufügen</button>
+    <div class="tab-panel active" id="dashboardTab">
+      <div class="grid">
+        <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div><div class="trend" id="balanceTrend">Alles im grünen Bereich</div></div>
+        <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div><div class="trend">Gesamte Geldeingänge</div></div>
+        <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div><div class="trend">Deine Kosten im Blick</div></div>
+        <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div><div class="trend">Alle Buchungen</div></div>
       </div>
-      <div class="quick">
-        <button class="qbtn" data-cat="Tanken">⛽ Tanken</button>
-        <button class="qbtn" data-cat="Einkaufen">🛒 Einkaufen</button>
-        <button class="qbtn" data-cat="Unternehmungen">🎉 Unternehmungen</button>
-        <button class="qbtn" data-cat="Kaufrausch">🛍️ Kaufrausch</button>
-        <button class="qbtn" data-cat="Sonstiges">✨ Sonstiges</button>
-        <button class="qbtn" id="undoBtn">↩️ Undo</button>
-      </div>
-    </div>
 
-    <div id="keypadModal" class="keypad-modal" aria-hidden="true">
-      <div class="keypad-sheet">
-        <div class="keypad-head">
-          <strong>Betrag eingeben</strong>
-          <button type="button" id="closePad" class="pad-close">✕</button>
-        </div>
-        <input id="padDisplay" class="pad-display" type="text" inputmode="decimal" readonly />
-        <div class="pad-grid">
-          <button type="button" class="pad-key">1</button><button type="button" class="pad-key">2</button><button type="button" class="pad-key">3</button>
-          <button type="button" class="pad-key">4</button><button type="button" class="pad-key">5</button><button type="button" class="pad-key">6</button>
-          <button type="button" class="pad-key">7</button><button type="button" class="pad-key">8</button><button type="button" class="pad-key">9</button>
-          <button type="button" class="pad-key pad-action" data-action="dot">,</button><button type="button" class="pad-key">0</button><button type="button" class="pad-key pad-action" data-action="del">⌫</button>
-        </div>
-        <button type="button" id="confirmPad" class="pad-confirm">Übernehmen</button>
-      </div>
-    </div>
-
-    <div class="content">
       <div class="panel">
-        <div class="sectiontitle"><h2>Transaktionen</h2><span class="chip" id="latestCount">0 Buchungen</span></div>
-        <ul class="list" id="list"></ul>
-        <div class="footer">Die Daten bleiben im Browser gespeichert.</div>
+        <div class="sectiontitle"><h2>Schneller Eintrag</h2><span class="chip">1-Tap Kategorien</span></div>
+        <div class="row">
+          <select id="title">
+            <option value="" selected disabled>Beschreibung wählen</option>
+            <option value="Tanken">Tanken</option>
+            <option value="Einkaufen">Einkaufen</option>
+            <option value="Sonstiges">Sonstiges</option>
+            <option value="Unternehmungen">Unternehmungen</option>
+            <option value="Kaufrausch">Kaufrausch</option>
+          </select>
+          <input id="amount" type="text" inputmode="decimal" placeholder="Betrag" readonly />
+          <select id="type"><option value="expense">Ausgabe</option><option value="income">Einnahme</option></select>
+          <button id="addBtn">Hinzufügen</button>
+        </div>
+        <div class="quick">
+          <button class="qbtn" data-cat="Tanken">⛽ Tanken</button>
+          <button class="qbtn" data-cat="Einkaufen">🛒 Einkaufen</button>
+          <button class="qbtn" data-cat="Unternehmungen">🎉 Unternehmungen</button>
+          <button class="qbtn" data-cat="Kaufrausch">🛍️ Kaufrausch</button>
+          <button class="qbtn" data-cat="Sonstiges">✨ Sonstiges</button>
+          <button class="qbtn" id="undoBtn">↩️ Undo</button>
+        </div>
       </div>
+
+      <div id="keypadModal" class="keypad-modal" aria-hidden="true">
+        <div class="keypad-sheet">
+          <div class="keypad-head">
+            <strong>Betrag eingeben</strong>
+            <button type="button" id="closePad" class="pad-close">✕</button>
+          </div>
+          <input id="padDisplay" class="pad-display" type="text" inputmode="decimal" readonly />
+          <div class="pad-grid">
+            <button type="button" class="pad-key">1</button><button type="button" class="pad-key">2</button><button type="button" class="pad-key">3</button>
+            <button type="button" class="pad-key">4</button><button type="button" class="pad-key">5</button><button type="button" class="pad-key">6</button>
+            <button type="button" class="pad-key">7</button><button type="button" class="pad-key">8</button><button type="button" class="pad-key">9</button>
+            <button type="button" class="pad-key pad-action" data-action="dot">,</button><button type="button" class="pad-key">0</button><button type="button" class="pad-key pad-action" data-action="del">⌫</button>
+          </div>
+          <button type="button" id="confirmPad" class="pad-confirm">Übernehmen</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="panel">
+          <div class="sectiontitle"><h2>Transaktionen</h2><span class="chip" id="latestCount">0 Buchungen</span></div>
+          <ul class="list" id="list"></ul>
+          <div class="footer">Die Daten bleiben im Browser gespeichert.</div>
+        </div>
+        <div class="panel">
+          <div class="sectiontitle"><h2>Kategorie Chart</h2><span class="chip">Ausgaben</span></div>
+          <div class="chart" id="chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="fixkostenTab">
       <div class="panel">
-        <div class="sectiontitle"><h2>Kategorie Chart</h2><span class="chip">Ausgaben</span></div>
-        <div class="chart" id="chart"></div>
+        <div class="sectiontitle"><h2>Fixkosten jährlich</h2><span class="chip">Monatlich eintragen</span></div>
+        <div style="overflow-x:auto">
+          <table class="fixed-table">
+            <thead>
+              <tr><th>Posten</th><th>Jan</th><th>Feb</th><th>Mär</th><th>Apr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Dez</th><th>Jahr</th></tr>
+            </thead>
+            <tbody id="fixedBody"></tbody>
+            <tfoot>
+              <tr class="sum-row"><td>Monatssumme</td><td id="m1">0</td><td id="m2">0</td><td id="m3">0</td><td id="m4">0</td><td id="m5">0</td><td id="m6">0</td><td id="m7">0</td><td id="m8">0</td><td id="m9">0</td><td id="m10">0</td><td id="m11">0</td><td id="m12">0</td><td id="yearTotal">0</td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="footer">Trage pro Monat deine Fixkosten ein. Die Jahressumme und die monatliche Gesamtsumme werden automatisch berechnet.</div>
       </div>
     </div>
   </div>
@@ -134,14 +162,30 @@
     const padDisplay = document.getElementById('padDisplay');
     const closePad = document.getElementById('closePad');
     const confirmPad = document.getElementById('confirmPad');
-    let padValue = '';
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const dashboardTab = document.getElementById('dashboardTab');
+    const fixkostenTab = document.getElementById('fixkostenTab');
+    const fixedBody = document.getElementById('fixedBody');
+    const monthCells = Array.from({length:12}, (_,i)=>document.getElementById('m'+(i+1)));
+    const yearTotalEl = document.getElementById('yearTotal');
     const STORAGE_KEY = 'expense-tracker-items';
+    const fixedKey = 'fixed-costs-items';
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let history = [];
+    let padValue = '';
+    let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
+    if (!fixedRows.length) fixedRows = [
+      {name:'Miete', months:Array(12).fill('')},
+      {name:'Versicherung', months:Array(12).fill('')},
+      {name:'Strom', months:Array(12).fill('')},
+      {name:'Internet', months:Array(12).fill('')}
+    ];
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
     const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const saveFixed = () => localStorage.setItem(fixedKey, JSON.stringify(fixedRows));
+    const n = v => Number(String(v).replace(',', '.')) || 0;
     const openPad = () => { padValue = amountEl.value.replace('.', ','); padDisplay.value = padValue; keypadModal.classList.add('open'); keypadModal.setAttribute('aria-hidden','false'); };
     const closePadFn = () => { keypadModal.classList.remove('open'); keypadModal.setAttribute('aria-hidden','true'); };
     const syncPad = () => { padDisplay.value = padValue || ''; amountEl.value = padValue.replace(',', '.'); };
@@ -157,6 +201,23 @@
         div.innerHTML = `<div class="bar" style="height:${h}px;background:${colors[cat]}"></div><div class="barlabel">${cat}<br>${eur(totals[cat])}</div>`;
         chartEl.appendChild(div);
       });
+    };
+    const renderFixed = () => {
+      fixedBody.innerHTML = '';
+      fixedRows.forEach((row, rIndex) => {
+        const tr = document.createElement('tr');
+        const cells = [`<td class="namecell"><input data-r="${rIndex}" data-c="name" value="${row.name}"></td>`];
+        for (let i=0;i<12;i++) cells.push(`<td><input inputmode="decimal" data-r="${rIndex}" data-c="${i}" value="${row.months[i] || ''}"></td>`);
+        const yearly = row.months.reduce((s,v)=>s+n(v),0);
+        cells.push(`<td data-year="${rIndex}">${eur(yearly)}</td>`);
+        tr.innerHTML = cells.join('');
+        fixedBody.appendChild(tr);
+      });
+      const totals = Array(12).fill(0);
+      fixedRows.forEach(row => row.months.forEach((v,i)=>totals[i]+=n(v)));
+      const totalYear = totals.reduce((a,b)=>a+b,0);
+      monthCells.forEach((el,i)=>el.textContent = eur(totals[i]));
+      yearTotalEl.textContent = eur(totalYear);
     };
     const render = () => {
       const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
@@ -197,6 +258,20 @@
     keypadModal.addEventListener('click', e => { if (e.target === keypadModal) closePadFn(); });
     document.querySelectorAll('.pad-key').forEach(k => k.addEventListener('click', () => { const t = k.textContent.trim(); const action = k.dataset.action; if (action === 'del') padValue = padValue.slice(0,-1); else if (action === 'dot') { if (!padValue.includes(',') && !padValue.includes('.')) padValue += ','; } else padValue += t; syncPad(); }));
     confirmPad.addEventListener('click', () => { syncPad(); closePadFn(); amountEl.focus(); });
+    fixedBody.addEventListener('input', e => {
+      const r = e.target.dataset.r; const c = e.target.dataset.c;
+      if (r == null || c == null) return;
+      if (c === 'name') fixedRows[r].name = e.target.value;
+      else fixedRows[r].months[c] = e.target.value;
+      saveFixed(); renderFixed();
+    });
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      dashboardTab.classList.toggle('active', tab === 'dashboard');
+      fixkostenTab.classList.toggle('active', tab === 'fixkosten');
+    }));
+    renderFixed();
     render();
   </script>
 </body>
