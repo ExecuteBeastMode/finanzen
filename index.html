@@ -39,7 +39,7 @@
     .pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.pad-key{min-height:64px;font-size:1.35rem;background:rgba(255,255,255,.06)}.pad-action{background:rgba(139,92,246,.28)}
     .preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.preset-btn{min-height:46px;font-size:1rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25)}
     .pad-confirm{margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399)}
-    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td{transition:.15s ease}.fixed-table .catcell{font-weight:900}.fixed-table .catbox{display:block;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04)}.fixed-table .namecell{text-align:left;font-weight:800}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}.legend{margin-top:16px}.legend-grid{display:flex;flex-wrap:wrap;gap:10px}.legend-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line)}.swatch{width:14px;height:14px;border-radius:50%}.fixed-cat-title{margin:4px 0 10px;color:#cbd5e1;font-weight:800}.monthly-wrap{display:grid;gap:14px}.og-card{padding:14px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.04)}.og-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;font-weight:900}.sub-list{display:grid;gap:10px}.sub-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}.mini{min-height:44px;padding:10px 12px;border-radius:14px}.addline{margin-top:10px;display:grid;grid-template-columns:1fr auto;gap:10px}
+    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td{transition:.15s ease}.fixed-table .catcell{font-weight:900}.fixed-table .catbox{display:block;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04)}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}
     @media (max-width:980px){.grid,.content{grid-template-columns:1fr 1fr}.content{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}}
   </style>
@@ -62,7 +62,6 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
       <button class="tab-btn" data-tab="fixkosten">Fixkosten jährlich</button>
-      <button class="tab-btn" data-tab="fixkostenmonatlich">Fixkosten monatlich</button>
     </div>
 
     <div class="tab-panel active" id="dashboardTab">
@@ -147,7 +146,7 @@
             </tfoot>
           </table>
         </div>
-        <div class="footer">Klicke in eine Zelle, wähle Kategorie und Betrag.</div>
+        <div class="footer">Klicke in eine Zelle, um Betrag und Kategorie direkt zu bearbeiten.</div>
       </div>
 
       <div id="fixedModal" class="keypad-modal" aria-hidden="true">
@@ -165,19 +164,6 @@
           </div>
           <button type="button" id="saveFixedPad" class="pad-confirm">Übernehmen</button>
         </div>
-      </div>
-
-      <div class="panel legend">
-        <div class="sectiontitle"><h2>Legende</h2><span class="chip">Farbcodes</span></div>
-        <div class="legend-grid" id="legendGrid"></div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="fixkostenMonatlichTab">
-      <div class="panel">
-        <div class="sectiontitle"><h2>Fixkosten monatlich</h2><span class="chip">Ober- und Unterkategorien</span></div>
-        <div class="monthly-wrap" id="monthlyWrap"></div>
-        <div class="footer">Oberkategorien und Unterkategorien kannst du per + erweitern.</div>
       </div>
     </div>
   </div>
@@ -203,9 +189,7 @@
     const tabBtns = document.querySelectorAll('.tab-btn');
     const dashboardTab = document.getElementById('dashboardTab');
     const fixkostenTab = document.getElementById('fixkostenTab');
-    const fixkostenMonatlichTab = document.getElementById('fixkostenMonatlichTab');
     const fixedBody = document.getElementById('fixedBody');
-    const monthlyWrap = document.getElementById('monthlyWrap');
     const monthCells = Array.from({length:12}, (_,i)=>document.getElementById('m'+(i+1)));
     const yearTotalEl = document.getElementById('yearTotal');
     const fixedModal = document.getElementById('fixedModal');
@@ -216,11 +200,9 @@
     const fixedCategorySelect = document.getElementById('fixedCategorySelect');
     const newFixedCategoryName = document.getElementById('newFixedCategoryName');
     const addFixedCategoryBtn = document.getElementById('addFixedCategoryBtn');
-    const legendGrid = document.getElementById('legendGrid');
 
     const STORAGE_KEY = 'expense-tracker-items';
     const fixedKey = 'fixed-costs-items';
-    const monthlyKey = 'monthly-fixed-costs';
 
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let history = [];
@@ -247,19 +229,11 @@
       category: r.category || r.name
     }));
 
-    let monthlyData = JSON.parse(localStorage.getItem(monthlyKey) || '[]');
-    if (!monthlyData.length) monthlyData = [
-      {group:'Wohnen', subs:[{name:'Miete', amount:''}]},
-      {group:'Mobilität', subs:[{name:'Auto', amount:''}]},
-      {group:'Konsum', subs:[{name:'Freizeit', amount:''}]}
-    ];
-
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
     const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     const saveFixed = () => localStorage.setItem(fixedKey, JSON.stringify(fixedRows));
-    const saveMonthly = () => localStorage.setItem(monthlyKey, JSON.stringify(monthlyData));
     const n = v => Number(String(v).replace(',', '.')) || 0;
 
     const openPad = () => { padValue = amountEl.value.replace('.', ','); padDisplay.value = padValue; keypadModal.classList.add('open'); keypadModal.setAttribute('aria-hidden','false'); };
@@ -280,58 +254,16 @@
       });
     };
 
-    const renderMonthly = () => {
-      monthlyWrap.innerHTML = '';
-      monthlyData.forEach((group, gi) => {
-        const card = document.createElement('div');
-        card.className = 'og-card';
-        card.innerHTML = `
-          <div class="og-head">
-            <span>${group.group}</span>
-            <button class="qbtn mini add-group-sub" data-gi="${gi}">+ Unterkategorie</button>
-          </div>
-          <div class="sub-list">
-            ${group.subs.map((s, si)=>`
-              <div class="sub-row">
-                <input class="mini" data-gi="${gi}" data-si="${si}" value="${s.name}">
-                <input class="mini" inputmode="decimal" data-amount-gi="${gi}" data-amount-si="${si}" value="${s.amount}">
-                <button class="delbtn mini" data-del-sub="${gi}-${si}">x</button>
-              </div>`).join('')}
-          </div>`;
-        monthlyWrap.appendChild(card);
-      });
-      const addCard = document.createElement('div');
-      addCard.className = 'og-card';
-      addCard.innerHTML = `
-        <div class="og-head"><span>Neue Oberkategorie</span><button class="qbtn mini" id="addMonthlyGroupBtn">+</button></div>
-        <div class="addline">
-          <input id="newMonthlyGroupName" class="mini" placeholder="Name eingeben">
-          <button class="qbtn mini" id="newMonthlyGroupAdd">Hinzufügen</button>
-        </div>`;
-      monthlyWrap.appendChild(addCard);
-    };
-
     let activeFixed = null;
+    let fixedHistory = JSON.parse(localStorage.getItem('fixed-history') || '[]');
 
-    const renderLegend = () => {
-      legendGrid.innerHTML = fixedRows.map(r => `
-        <div class="legend-item">
-          <span class="swatch" style="background:${r.color || '#64748b'}"></span>
-          ${r.name}
-        </div>`).join('');
-    };
-
-    const renderFixedSelect = () => {
-      fixedCategorySelect.innerHTML =
-        fixedRows.map((r, i) => `<option value="${i}">${r.name}</option>`).join('') +
-        '<option value="new">+ frei benennen</option>';
-    };
+    const saveFixedHistory = () => localStorage.setItem('fixed-history', JSON.stringify(fixedHistory));
 
     const renderFixed = () => {
       fixedBody.innerHTML = '';
       fixedRows.forEach((row, rIndex) => {
         const tr = document.createElement('tr');
-        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</span></td>`];
+        const cells = [`<td class="catcell" style="position:relative"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</span><button class="delbtn" data-del-year="${rIndex}" style="position:absolute;top:6px;right:6px;width:30px;min-width:30px;min-height:30px;border-radius:10px;font-size:.85rem">x</button></td>`];
         for (let i=0;i<12;i++) cells.push(`<td><input readonly class="fixed-input" data-r="${rIndex}" data-c="${i}" value="${row.months[i] || ''}"></td>`);
         const yearly = row.months.reduce((s,v)=>s+n(v),0);
         cells.push(`<td data-year="${rIndex}">${eur(yearly)}</td>`);
@@ -343,14 +275,12 @@
       const totalYear = totals.reduce((a,b)=>a+b,0);
       monthCells.forEach((el,i)=>el.textContent = eur(totals[i]));
       yearTotalEl.textContent = eur(totalYear);
-      renderLegend();
-      renderFixedSelect();
     };
 
     const render = () => {
       const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
       const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
-      const monthlyFixed = fixedRows.reduce((s,row)=>s + row.months.reduce((a,v)=>a+n(v),0)/12, 0) + monthlyData.reduce((s,g)=>s + g.subs.reduce((a,v)=>a+n(v.amount),0),0);
+      const monthlyFixed = fixedRows.reduce((s,row)=>s + row.months.reduce((a,v)=>a+n(v),0)/12, 0);
       const balance = income - expense - monthlyFixed;
 
       balanceEl.textContent = eur(balance);
@@ -396,8 +326,10 @@
     addBtn.addEventListener('click', addItem);
     amountEl.addEventListener('click', openPad);
     [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); }));
+
     document.querySelectorAll('.qbtn').forEach(btn => btn.addEventListener('click', () => { if (btn.id !== 'undoBtn') titleEl.value = btn.dataset.cat; amountEl.focus(); }));
     undoBtn.addEventListener('click', () => { if (!history.length) return; items = JSON.parse(history.pop()); save(); render(); });
+
     closePad.addEventListener('click', closePadFn);
     keypadModal.addEventListener('click', e => { if (e.target === keypadModal) closePadFn(); });
 
@@ -419,50 +351,18 @@
 
     confirmPad.addEventListener('click', () => { syncPad(); closePadFn(); amountEl.focus(); });
 
-    renderMonthly();
-
-    monthlyWrap.addEventListener('input', e => {
-      const gi = e.target.dataset.gi; const si = e.target.dataset.si; const agi = e.target.dataset.amountGi; const asi = e.target.dataset.amountSi;
-      if (gi != null && si != null) { monthlyData[gi].subs[si].name = e.target.value; saveMonthly(); }
-      if (agi != null && asi != null) { monthlyData[agi].subs[asi].amount = e.target.value; saveMonthly(); render(); }
-      renderMonthly();
-    });
-
-    monthlyWrap.addEventListener('click', e => {
-      const d = e.target.closest('[data-del-sub]');
-      if (d) {
-        const [gi,si] = d.dataset.delSub.split('-').map(Number);
-        monthlyData[gi].subs.splice(si,1);
-        saveMonthly();
-        renderMonthly();
+    fixedBody.addEventListener('click', e => {
+      const del = e.target.closest('[data-del-year]');
+      if (del) {
+        const idx = +del.dataset.delYear;
+        fixedHistory.push(JSON.stringify(fixedRows));
+        fixedRows.splice(idx,1);
+        saveFixedHistory();
+        saveFixed();
+        renderFixed();
         render();
         return;
       }
-      if (e.target.id === 'addMonthlyGroupBtn' || e.target.id === 'newMonthlyGroupAdd') {
-        const input = document.getElementById('newMonthlyGroupName');
-        if (input.value.trim()) {
-          monthlyData.push({group:input.value.trim(), subs:[]});
-          saveMonthly();
-          renderMonthly();
-          input.value = '';
-          render();
-        }
-        return;
-      }
-      const addSub = e.target.closest('.add-group-sub');
-      if (addSub) {
-        const gi = +addSub.dataset.gi;
-        const name = prompt('Name der Unterkategorie');
-        if (name) {
-          monthlyData[gi].subs.push({name:name.trim(), amount:''});
-          saveMonthly();
-          renderMonthly();
-          render();
-        }
-      }
-    });
-
-    fixedBody.addEventListener('click', e => {
       const cell = e.target.closest('input[data-r][data-c]');
       if (!cell) return;
       activeFixed = {r:+cell.dataset.r, c:+cell.dataset.c};
@@ -538,11 +438,15 @@
       fixedModal.setAttribute('aria-hidden','true');
     });
 
-    fixedBody.addEventListener('input', e => {
-      const r = e.target.dataset.r; const c = e.target.dataset.c;
-      if (r == null || c == null) return;
-      if (c === 'name') fixedRows[r].name = e.target.value;
-      else fixedRows[r].months[c] = e.target.value;
+    const yearUndo = document.createElement('button');
+    yearUndo.id = 'yearUndoBtn';
+    yearUndo.className = 'qbtn';
+    yearUndo.textContent = '↩️ Undo Fixkosten';
+    document.querySelector('#fixkostenTab .panel').appendChild(yearUndo);
+    yearUndo.addEventListener('click', () => {
+      if (!fixedHistory.length) return;
+      fixedRows = JSON.parse(fixedHistory.pop());
+      saveFixedHistory();
       saveFixed();
       renderFixed();
       render();
@@ -562,11 +466,9 @@
       const tab = btn.dataset.tab;
       dashboardTab.classList.toggle('active', tab === 'dashboard');
       fixkostenTab.classList.toggle('active', tab === 'fixkosten');
-      fixkostenMonatlichTab.classList.toggle('active', tab === 'fixkostenmonatlich');
     }));
 
     renderFixed();
-    renderMonthly();
     render();
   </script>
 </body>
