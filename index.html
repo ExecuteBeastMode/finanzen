@@ -5,26 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
   <title>Finanz Tool</title>
   <style>
-    :root{--bg:#050816;--card:rgba(15,23,42,.55);--card2:rgba(255,255,255,.06);--text:#f8fafc;--muted:#a5b4fc;--line:rgba(255,255,255,.10);--c1:#8b5cf6;--c2:#22d3ee;--c3:#34d399;--c4:#fbbf24;--c5:#fb7185;--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--safe-left:env(safe-area-inset-left);--safe-right:env(safe-area-inset-right)}
+    :root{--bg:#050816;--text:#f8fafc;--line:rgba(255,255,255,.10);--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--safe-left:env(safe-area-inset-left);--safe-right:env(safe-area-inset-right)}
     *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at top left,rgba(139,92,246,.35),transparent 24%),radial-gradient(circle at top right,rgba(34,211,238,.22),transparent 20%),radial-gradient(circle at 50% 100%,rgba(251,191,36,.18),transparent 25%),linear-gradient(180deg,#050816,#0b1020 45%,#10172a)}
     body::before{content:'';position:fixed;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.04),transparent 35%,rgba(255,255,255,.02));pointer-events:none}
-    .wrap{max-width:1080px;margin:0 auto;padding:calc(18px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left))}
-    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
-    h1{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.04em;line-height:.95} .sub{color:#c7d2fe;margin-top:10px;font-size:1rem;max-width:52ch}
+    .wrap{max-width:1120px;margin:0 auto;padding:calc(18px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left))}
+    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px} h1{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.04em;line-height:.95} .sub{color:#c7d2fe;margin-top:10px;font-size:1rem;max-width:56ch}
     .topline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chip{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);font-weight:700;font-size:.92rem}
     .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}.tab-btn{padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);cursor:pointer}.tab-btn.active{background:linear-gradient(135deg,#8b5cf6,#22d3ee);box-shadow:0 14px 24px rgba(34,211,238,.18)}
     .tab-panel{display:none}.tab-panel.active{display:block}
     .grid{display:grid;grid-template-columns:1.2fr 1fr 1fr .9fr;gap:14px;margin:18px 0 22px}
     .card,.panel{background:linear-gradient(180deg,rgba(15,23,42,.68),rgba(15,23,42,.42));border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 60px rgba(0,0,0,.38);backdrop-filter:blur(24px);overflow:hidden}
-    .card{padding:18px;position:relative;isolation:isolate}.card::after{content:'';position:absolute;inset:auto -35px -35px auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 65%);filter:blur(2px);opacity:.55;z-index:-1}
-    .card:nth-child(1){border-color:rgba(139,92,246,.35)}.card:nth-child(2){border-color:rgba(34,211,238,.28)}.card:nth-child(3){border-color:rgba(251,191,36,.28)}.card:nth-child(4){border-color:rgba(52,211,153,.28)}
+    .card{padding:18px}
     .label{color:#cbd5e1;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}.value{font-size:1.9rem;font-weight:900;margin-top:12px}.trend{margin-top:10px;font-size:.92rem;color:#dbeafe;opacity:.9}
     .panel{padding:18px}
     .row{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px}
     input,select,button{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(2,6,23,.62);color:var(--text);padding:14px 14px;font-size:16px;min-height:52px;outline:none}
     input::placeholder{color:#94a3b8} input:focus,select:focus{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 4px rgba(34,211,238,.12)}
-    button{cursor:pointer;border:none;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399);box-shadow:0 16px 30px rgba(34,211,238,.18);transform:translateY(0);transition:.18s ease}
-    button:hover{transform:translateY(-1px);filter:saturate(1.06)}
+    button{cursor:pointer;border:none;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399);box-shadow:0 16px 30px rgba(34,211,238,.18);transition:.18s ease} button:hover{transform:translateY(-1px);filter:saturate(1.06)}
     .quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.qbtn{padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
     .content{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
     .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h2{margin:0;font-size:1.1rem}
@@ -33,15 +30,16 @@
     .empty{color:#94a3b8;padding:10px 0}.chart{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:230px;margin-top:12px;padding-top:4px}.barwrap{display:flex;flex-direction:column;align-items:center;gap:8px}.bar{width:100%;min-height:18px;border-radius:16px 16px 8px 8px;box-shadow:0 14px 28px rgba(0,0,0,.22)}.barlabel{font-size:.78rem;color:#cbd5e1;text-align:center;line-height:1.2}
     .footer{margin-top:16px;color:#94a3b8;font-size:.9rem}
     .keypad-modal{position:fixed;inset:0;background:rgba(2,6,23,.72);display:none;align-items:end;justify-content:center;padding:16px;z-index:50}.keypad-modal.open{display:flex}
-    .keypad-sheet{width:min(420px,100%);background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(15,23,42,.86));border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.5);backdrop-filter:blur(24px);padding:16px}
+    .keypad-sheet{width:min(460px,100%);background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(15,23,42,.86));border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.5);backdrop-filter:blur(24px);padding:16px}
     .keypad-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.pad-close{width:42px;min-height:42px;border-radius:12px;background:rgba(255,255,255,.06)}
     .pad-display{width:100%;font-size:1.7rem;font-weight:900;text-align:right;padding:14px 16px;margin-bottom:12px;border-radius:18px;background:rgba(255,255,255,.05)}
     .pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.pad-key{min-height:64px;font-size:1.35rem;background:rgba(255,255,255,.06)}.pad-action{background:rgba(139,92,246,.28)}
     .preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.preset-btn{min-height:46px;font-size:1rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25)}
     .pad-confirm{margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399)}
-    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td{transition:.15s ease}.fixed-table .catcell{font-weight:900}.fixed-table .catbox{display:block;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04)}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}
+    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td{transition:.15s ease}.fixed-table .catcell{font-weight:900;position:relative}.fixed-table .catbox{display:block;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04);text-align:left}.fixed-table .cellbox{position:relative;min-height:44px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;overflow:hidden}.fixed-table .cellvalue{font-weight:800;color:#e2e8f0;pointer-events:none}.cellactions{position:absolute;top:6px;right:6px;display:flex;gap:6px}.tiny{width:26px;min-width:26px;min-height:26px;border-radius:9px;padding:0;line-height:1;box-shadow:none;font-size:.8rem}.tiny.add{background:rgba(52,211,153,.18);border:1px solid rgba(52,211,153,.35)}.tiny.del{background:rgba(251,113,133,.18);border:1px solid rgba(251,113,133,.35)}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}.smallrow{display:flex;gap:10px;flex-wrap:wrap}.smallrow button{width:auto;min-width:180px}
     @media (max-width:980px){.grid,.content{grid-template-columns:1fr 1fr}.content{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}}
+    @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}.smallrow button{min-width:unset;flex:1}}
   </style>
 </head>
 <body>
@@ -49,7 +47,7 @@
     <div class="hero">
       <div>
         <h1>Finanz Tool</h1>
-        <div class="sub">Ein hochwertiges, ruhiges Dashboard zum Tracken deiner Ausgaben — klar, schnell und iPhone-freundlich.</div>
+        <div class="sub">Ein ruhiges Dashboard zum Tracken deiner Ausgaben — mit jährlichen Fixkosten, farbigen Kategorien und Undo für die letzte Änderung.</div>
         <div class="topline">
           <div class="chip">⚡ Quick Add</div>
           <div class="chip">🎨 Premium UI</div>
@@ -134,7 +132,13 @@
 
     <div class="tab-panel" id="fixkostenTab">
       <div class="panel">
-        <div class="sectiontitle"><h2>Fixkosten jährlich</h2><span class="chip">Kategorie wählen + Betrag</span></div>
+        <div class="panel-head">
+          <div class="sectiontitle" style="margin:0"><h2>Fixkosten jährlich</h2><span class="chip">Kategorie wählen + Betrag</span></div>
+          <div class="smallrow">
+            <button id="addYearRowBtn">+ Zeile hinzufügen</button>
+            <button id="yearUndoBtn">↩️ Undo letzte Änderung</button>
+          </div>
+        </div>
         <div style="overflow-x:auto">
           <table class="fixed-table">
             <thead>
@@ -146,7 +150,7 @@
             </tfoot>
           </table>
         </div>
-        <div class="footer">Klicke in eine Zelle, um Betrag und Kategorie direkt zu bearbeiten.</div>
+        <div class="footer">Klicke auf eine Zelle, um Kategorie und Betrag zu bearbeiten. Mit x löscht du die Zeile.</div>
       </div>
 
       <div id="fixedModal" class="keypad-modal" aria-hidden="true">
@@ -158,9 +162,9 @@
           <div class="fixed-cat-title" id="fixedCatTitle">Kategorie</div>
           <select id="fixedCategorySelect" class="pad-display" style="text-align:left;font-size:1rem;font-weight:700;height:auto;min-height:52px"></select>
           <input id="fixedPadDisplay" class="pad-display" type="text" inputmode="decimal" placeholder="Betrag" />
-          <div class="addline">
+          <div class="smallrow" style="margin-top:10px">
             <input id="newFixedCategoryName" class="mini" placeholder="Kategorie frei benennen">
-            <button type="button" class="qbtn mini" id="addFixedCategoryBtn">+</button>
+            <button type="button" id="addFixedCategoryBtn">+</button>
           </div>
           <button type="button" id="saveFixedPad" class="pad-confirm">Übernehmen</button>
         </div>
@@ -200,41 +204,33 @@
     const fixedCategorySelect = document.getElementById('fixedCategorySelect');
     const newFixedCategoryName = document.getElementById('newFixedCategoryName');
     const addFixedCategoryBtn = document.getElementById('addFixedCategoryBtn');
+    const addYearRowBtn = document.getElementById('addYearRowBtn');
+    const yearUndoBtn = document.getElementById('yearUndoBtn');
 
     const STORAGE_KEY = 'expense-tracker-items';
     const fixedKey = 'fixed-costs-items';
+    const fixedHistoryKey = 'fixed-history';
 
     let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let history = [];
     let padValue = '';
-
     const fixedColors = ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'];
     const fixedCategoriesDefault = ['Versicherung','Auto','Autosteuer','Autoversicherung','GEZ','Urlaub','Nebenkosten'];
 
     let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
-    if (!fixedRows.length) {
-      fixedRows = fixedCategoriesDefault.map((name, i) => ({
-        name,
-        color: fixedColors[i % fixedColors.length],
-        months: Array(12).fill(''),
-        value: '',
-        category: name
-      }));
-    }
-    fixedRows = fixedRows.map((r, i) => ({
-      ...r,
-      color: r.color || fixedColors[i % fixedColors.length],
-      months: r.months || Array(12).fill(''),
-      value: r.value || '',
-      category: r.category || r.name
-    }));
+    if (!fixedRows.length) fixedRows = fixedCategoriesDefault.map((name, i) => ({id:crypto.randomUUID(), name, color:fixedColors[i % fixedColors.length], months:Array(12).fill(''), category:name}));
+    fixedRows = fixedRows.map((r, i) => ({...r, id:r.id || crypto.randomUUID(), color:r.color || fixedColors[i % fixedColors.length], months:r.months || Array(12).fill(''), category:r.category || r.name}));
+
+    let fixedHistory = JSON.parse(localStorage.getItem(fixedHistoryKey) || '[]');
 
     const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
     const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
     const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
+    const n = v => Number(String(v).replace(',', '.')) || 0;
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     const saveFixed = () => localStorage.setItem(fixedKey, JSON.stringify(fixedRows));
-    const n = v => Number(String(v).replace(',', '.')) || 0;
+    const saveFixedHistory = () => localStorage.setItem(fixedHistoryKey, JSON.stringify(fixedHistory));
+    const snapshotFixed = () => { fixedHistory.push(JSON.stringify(fixedRows)); saveFixedHistory(); };
 
     const openPad = () => { padValue = amountEl.value.replace('.', ','); padDisplay.value = padValue; keypadModal.classList.add('open'); keypadModal.setAttribute('aria-hidden','false'); };
     const closePadFn = () => { keypadModal.classList.remove('open'); keypadModal.setAttribute('aria-hidden','true'); };
@@ -255,18 +251,23 @@
     };
 
     let activeFixed = null;
-    let fixedHistory = JSON.parse(localStorage.getItem('fixed-history') || '[]');
 
-    const saveFixedHistory = () => localStorage.setItem('fixed-history', JSON.stringify(fixedHistory));
+    function renderFixedSelect(){
+      fixedCategorySelect.innerHTML = fixedRows.map((r, i) => `<option value="${i}">${r.name}</option>`).join('') + '<option value="new">+ frei benennen</option>';
+    }
 
-    const renderFixed = () => {
+    function renderFixed(){
       fixedBody.innerHTML = '';
       fixedRows.forEach((row, rIndex) => {
         const tr = document.createElement('tr');
-        const cells = [`<td class="catcell" style="position:relative"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</span><button class="delbtn" data-del-year="${rIndex}" style="position:absolute;top:6px;right:6px;width:30px;min-width:30px;min-height:30px;border-radius:10px;font-size:.85rem">x</button></td>`];
-        for (let i=0;i<12;i++) cells.push(`<td><input readonly class="fixed-input" data-r="${rIndex}" data-c="${i}" value="${row.months[i] || ''}"></td>`);
+        tr.dataset.row = rIndex;
+        const cells = [`<td class="catcell"><span class="catbox" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</span></td>`];
+        for (let i=0;i<12;i++) {
+          const val = row.months[i] || '';
+          cells.push(`<td><div class="cellbox" data-r="${rIndex}" data-c="${i}" style="border-color:${val ? row.color : 'transparent'};box-shadow:${val ? '0 0 0 2px ' + row.color + '66 inset' : 'none'}"><span class="cellvalue">${val ? eur(n(val)) : ''}</span><div class="cellactions"><button class="tiny add" data-act="edit" data-r="${rIndex}" data-c="${i}">+</button><button class="tiny del" data-act="delcell" data-r="${rIndex}" data-c="${i}">x</button></div></div></td>`);
+        }
         const yearly = row.months.reduce((s,v)=>s+n(v),0);
-        cells.push(`<td data-year="${rIndex}">${eur(yearly)}</td>`);
+        cells.push(`<td>${eur(yearly)}</td>`);
         tr.innerHTML = cells.join('');
         fixedBody.appendChild(tr);
       });
@@ -275,43 +276,95 @@
       const totalYear = totals.reduce((a,b)=>a+b,0);
       monthCells.forEach((el,i)=>el.textContent = eur(totals[i]));
       yearTotalEl.textContent = eur(totalYear);
-    };
+      renderFixedSelect();
+    }
 
-    const render = () => {
+    function render(){
       const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
       const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
       const monthlyFixed = fixedRows.reduce((s,row)=>s + row.months.reduce((a,v)=>a+n(v),0)/12, 0);
       const balance = income - expense - monthlyFixed;
-
       balanceEl.textContent = eur(balance);
       balanceTrendEl.textContent = balance >= 0 ? 'Nach Fixkosten stabil' : 'Achte auf deine Fixkosten';
       incomeEl.textContent = eur(income);
       expenseEl.textContent = eur(expense);
       countEl.textContent = items.length;
       latestCountEl.textContent = `${items.length} Buchungen`;
-
       listEl.innerHTML = items.length ? '' : '<li class="empty">Noch keine Einträge vorhanden.</li>';
       items.slice().reverse().forEach(item => {
         const li = document.createElement('li');
         li.className = 'item';
-        li.innerHTML = `
-          <div class="left">
-            <div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div>
-            <div>
-              <strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong>
-              <div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div>
-            <button class="delbtn" data-id="${item.id}">x</button>
-          </div>`;
+        li.innerHTML = `<div class="left"><div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div><div><strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div></div><div style="display:flex;align-items:center;gap:10px"><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div><button class="delbtn" data-id="${item.id}">x</button></div>`;
         listEl.appendChild(li);
       });
       renderChart();
-    };
+      renderFixed();
+    }
 
-    const addItem = () => {
+    function pushFixedSnapshot(){ snapshotFixed(); }
+
+    function openFixedEditor(r, c){
+      activeFixed = {r, c};
+      const row = fixedRows[r];
+      fixedCatTitle.textContent = row.name + ' · Monat ' + (c + 1);
+      fixedCategorySelect.value = String(r);
+      fixedPadDisplay.value = row.months[c] || '';
+      fixedModal.classList.add('open');
+      fixedModal.setAttribute('aria-hidden','false');
+    }
+
+    function addFixedRow(name='Neue Kategorie'){
+      pushFixedSnapshot();
+      fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name});
+      saveFixed();
+      renderFixed();
+      render();
+    }
+
+    function undoFixed(){
+      if (!fixedHistory.length) return;
+      fixedRows = JSON.parse(fixedHistory.pop());
+      saveFixedHistory();
+      saveFixed();
+      renderFixed();
+      render();
+    }
+
+    function commitFixedEdit(){
+      if (!activeFixed) return;
+      const idx = fixedCategorySelect.value === 'new' ? activeFixed.r : +fixedCategorySelect.value;
+      if (idx == null || Number.isNaN(idx)) return;
+      pushFixedSnapshot();
+      const amount = fixedPadDisplay.value.trim();
+      const cat = fixedCategorySelect.value === 'new' ? (newFixedCategoryName.value.trim() || 'Neue Kategorie') : fixedRows[idx].name;
+      fixedRows[idx].name = cat;
+      fixedRows[idx].category = cat;
+      fixedRows[idx].months[activeFixed.c] = amount;
+      saveFixed();
+      renderFixed();
+      render();
+      fixedModal.classList.remove('open');
+      fixedModal.setAttribute('aria-hidden','true');
+    }
+
+    function deleteFixedCell(r, c){
+      pushFixedSnapshot();
+      fixedRows[r].months[c] = '';
+      saveFixed();
+      renderFixed();
+      render();
+    }
+
+    function deleteFixedRow(r){
+      if (fixedRows.length <= 1) return;
+      pushFixedSnapshot();
+      fixedRows.splice(r, 1);
+      saveFixed();
+      renderFixed();
+      render();
+    }
+
+    addBtn.addEventListener('click', () => {
       const title = titleEl.value.trim();
       const amount = Number(String(amountEl.value).replace(',', '.'));
       const type = typeEl.value;
@@ -321,15 +374,12 @@
       save();
       titleEl.value = ''; amountEl.value = ''; padValue = ''; closePadFn(); titleEl.focus();
       render();
-    };
+    });
 
-    addBtn.addEventListener('click', addItem);
     amountEl.addEventListener('click', openPad);
-    [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); }));
-
+    [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn.click(); }));
     document.querySelectorAll('.qbtn').forEach(btn => btn.addEventListener('click', () => { if (btn.id !== 'undoBtn') titleEl.value = btn.dataset.cat; amountEl.focus(); }));
     undoBtn.addEventListener('click', () => { if (!history.length) return; items = JSON.parse(history.pop()); save(); render(); });
-
     closePad.addEventListener('click', closePadFn);
     keypadModal.addEventListener('click', e => { if (e.target === keypadModal) closePadFn(); });
 
@@ -341,133 +391,35 @@
       else padValue += t;
       syncPad();
     }));
-
     document.querySelectorAll('.preset-btn').forEach(b => b.addEventListener('click', () => {
-      const p = b.dataset.preset;
       const base = padDisplay.value.replace(/[,\.].*$/, '');
-      padValue = base + p;
+      padValue = base + b.dataset.preset;
       syncPad();
     }));
-
     confirmPad.addEventListener('click', () => { syncPad(); closePadFn(); amountEl.focus(); });
 
     fixedBody.addEventListener('click', e => {
-      const del = e.target.closest('[data-del-year]');
-      if (del) {
-        const idx = +del.dataset.delYear;
-        fixedHistory.push(JSON.stringify(fixedRows));
-        fixedRows.splice(idx,1);
-        saveFixedHistory();
-        saveFixed();
-        renderFixed();
-        render();
-        return;
-      }
-      const cell = e.target.closest('input[data-r][data-c]');
-      if (!cell) return;
-      activeFixed = {r:+cell.dataset.r, c:+cell.dataset.c};
-      const row = fixedRows[activeFixed.r];
-      fixedCatTitle.textContent = row.name + ' · Monat ' + (activeFixed.c+1);
-      fixedCategorySelect.value = String(activeFixed.r);
-      fixedPadDisplay.value = row.months[activeFixed.c] || '';
-      fixedModal.classList.add('open');
-      fixedModal.setAttribute('aria-hidden','false');
+      const delCell = e.target.closest('[data-act="delcell"]');
+      if (delCell) { deleteFixedCell(+delCell.dataset.r, +delCell.dataset.c); return; }
+      const editCell = e.target.closest('[data-act="edit"]');
+      if (editCell) { openFixedEditor(+editCell.dataset.r, +editCell.dataset.c); return; }
+      const box = e.target.closest('.cellbox');
+      if (!box) return;
+      openFixedEditor(+box.dataset.r, +box.dataset.c);
     });
 
     fixedModal.addEventListener('click', e => { if (e.target === fixedModal) { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); } });
     closeFixedPad.addEventListener('click', () => { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); });
+    fixedCategorySelect.addEventListener('change', () => { if (fixedCategorySelect.value === 'new') newFixedCategoryName.focus(); else { const row = fixedRows[+fixedCategorySelect.value]; if (row) fixedCatTitle.textContent = row.name; } });
+    addFixedCategoryBtn.addEventListener('click', () => { const name = newFixedCategoryName.value.trim(); if (!name) return; pushFixedSnapshot(); fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name}); saveFixed(); renderFixed(); render(); newFixedCategoryName.value=''; fixedCategorySelect.value = String(fixedRows.length - 1); });
+    saveFixedPad.addEventListener('click', commitFixedEdit);
+    addYearRowBtn.addEventListener('click', () => addFixedRow('Neue Kategorie'));
+    yearUndoBtn.addEventListener('click', undoFixed);
 
-    fixedCategorySelect.addEventListener('change', () => {
-      if (fixedCategorySelect.value === 'new') newFixedCategoryName.focus();
-      else {
-        const row = fixedRows[+fixedCategorySelect.value];
-        if (row) fixedCatTitle.textContent = row.name;
-      }
-    });
+    listEl.addEventListener('click', e => { const b = e.target.closest('.delbtn'); if (!b) return; items = items.filter(x => x.id !== b.dataset.id); save(); render(); });
+    tabBtns.forEach(btn => btn.addEventListener('click', () => { tabBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; dashboardTab.classList.toggle('active', tab === 'dashboard'); fixkostenTab.classList.toggle('active', tab === 'fixkosten'); }));
 
-    addFixedCategoryBtn.addEventListener('click', () => {
-      const name = newFixedCategoryName.value.trim();
-      if (!name) return;
-      fixedRows.push({
-        name,
-        color: fixedColors[fixedRows.length % fixedColors.length],
-        months: Array(12).fill(''),
-        value: '',
-        category: name
-      });
-      saveFixed();
-      renderFixed();
-      newFixedCategoryName.value = '';
-      fixedCategorySelect.value = String(fixedRows.length - 1);
-    });
-
-    document.querySelectorAll('#fixedModal .pad-key').forEach(k => k.addEventListener('click', () => {
-      const t = k.textContent.trim();
-      const action = k.dataset.action;
-      if (action === 'del') fixedPadDisplay.value = fixedPadDisplay.value.slice(0,-1);
-      else if (action === 'dot') {
-        if (!fixedPadDisplay.value.includes(',') && !fixedPadDisplay.value.includes('.')) fixedPadDisplay.value += ',';
-      } else fixedPadDisplay.value += t;
-    }));
-
-    document.querySelectorAll('#fixedModal .preset-btn').forEach(b => b.addEventListener('click', () => {
-      const p = b.dataset.preset;
-      const base = fixedPadDisplay.value.replace(/[,\.].*$/, '');
-      fixedPadDisplay.value = base + p;
-    }));
-
-    saveFixedPad.addEventListener('click', () => {
-      if (!activeFixed) return;
-      const idx = fixedCategorySelect.value === 'new' ? activeFixed.r : +fixedCategorySelect.value;
-      const amount = fixedPadDisplay.value.trim();
-      const cat = fixedCategorySelect.value === 'new'
-        ? (newFixedCategoryName.value.trim() || 'Keine Kategorie')
-        : fixedRows[idx].name;
-
-      if (idx == null || Number.isNaN(idx)) return;
-
-      fixedRows[idx].name = cat;
-      fixedRows[idx].category = cat;
-      fixedRows[idx].months[activeFixed.c] = amount;
-      fixedRows[idx].value = amount;
-
-      saveFixed();
-      renderFixed();
-      render();
-      fixedModal.classList.remove('open');
-      fixedModal.setAttribute('aria-hidden','true');
-    });
-
-    const yearUndo = document.createElement('button');
-    yearUndo.id = 'yearUndoBtn';
-    yearUndo.className = 'qbtn';
-    yearUndo.textContent = '↩️ Undo Fixkosten';
-    document.querySelector('#fixkostenTab .panel').appendChild(yearUndo);
-    yearUndo.addEventListener('click', () => {
-      if (!fixedHistory.length) return;
-      fixedRows = JSON.parse(fixedHistory.pop());
-      saveFixedHistory();
-      saveFixed();
-      renderFixed();
-      render();
-    });
-
-    listEl.addEventListener('click', e => {
-      const b = e.target.closest('.delbtn');
-      if (!b) return;
-      items = items.filter(x => x.id !== b.dataset.id);
-      save();
-      render();
-    });
-
-    tabBtns.forEach(btn => btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      dashboardTab.classList.toggle('active', tab === 'dashboard');
-      fixkostenTab.classList.toggle('active', tab === 'fixkosten');
-    }));
-
+    renderFixedSelect();
     renderFixed();
     render();
   </script>
