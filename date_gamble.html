@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Date Gamble</title>
+<style>
+:root{--bg:#07111f;--card:#0d1a2b;--line:rgba(255,255,255,.12);--text:#e8eefc;--muted:#9fb0d0;--accent:#f59e0b;--accent2:#60a5fa;--accent3:#6ee7b7}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#12213d,#07111f 50%);color:var(--text);min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:32px}
+.title{font-size:clamp(2rem,4vw,3.2rem);margin:0 0 8px}.subtitle{color:var(--muted);margin:0 0 24px;max-width:760px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.25)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.26);color:#ffe1b0;font-size:.92rem;margin-bottom:14px;width:max-content}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px}.row input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#09111d;color:var(--text);font-size:1rem;outline:none}.row button,.primary{padding:12px 16px;border:0;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#fb7185);color:white;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.22)}
+.list{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.pill{padding:10px 12px;border-radius:999px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.22);color:#dbeafe;display:flex;align-items:center;gap:10px}.pill button{border:0;background:transparent;color:#ffd6d6;cursor:pointer;font-size:1rem}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.secondary{padding:12px 16px;border-radius:12px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.28);color:#dfefff;font-weight:800;cursor:pointer}
+.wheelWrap{display:flex;flex-direction:column;align-items:center;gap:18px}
+.wheelArea{position:relative;width:min(100%,420px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at center,#101c31 0,#09111d 55%,#07111f 100%);border:1px solid var(--line);box-shadow:inset 0 0 0 10px rgba(255,255,255,.03),0 18px 60px rgba(0,0,0,.35)}
+.wheel{position:absolute;inset:18px;border-radius:50%;overflow:hidden;transform:rotate(0deg);transition:transform 4s cubic-bezier(.15,.85,.15,1)}
+.pointer{position:absolute;top:-2px;width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:28px solid #fff;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.center{position:relative;z-index:2;width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f59e0b,#fb7185);color:#fff;font-weight:900;text-align:center;padding:12px;box-shadow:0 10px 30px rgba(245,158,11,.25)}
+.result{width:100%;padding:16px;border-radius:18px;background:rgba(110,231,183,.12);border:1px solid rgba(110,231,183,.26);color:#dbffee;font-weight:800;text-align:center;min-height:56px;display:grid;place-items:center}
+.small{color:var(--muted);font-size:.95rem;line-height:1.5}
+@media (max-width: 900px){.grid{grid-template-columns:1fr}.wheelArea{max-width:420px;margin:0 auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title">Date Gamble</h1>
+  <p class="subtitle">Trage deine Date-Möglichkeiten ein und lass das Zahlenrad zufällig entscheiden, was genommen wird.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="badge">Optionen festlegen</div>
+      <div class="row"><input id="optionInput" placeholder="z. B. Kino"><button id="addBtn">Hinzufügen</button></div>
+      <div class="controls">
+        <button class="secondary" id="spinBtn">Rad drehen</button>
+        <button class="secondary" id="clearBtn">Alle löschen</button>
+      </div>
+      <div class="list" id="optionList"></div>
+      <p class="small">Tipp: Du kannst beliebig viele Optionen eintragen. Jede Option bekommt einen Abschnitt im Rad.</p>
+    </div>
+    <div class="card wheelWrap">
+      <div class="badge">Zahlenrad</div>
+      <div class="wheelArea">
+        <div class="pointer"></div>
+        <canvas class="wheel" id="wheel" width="800" height="800"></canvas>
+        <div class="center">DATE<br>GAMBLE</div>
+      </div>
+      <div class="result" id="result">Noch keine Auswahl getroffen.</div>
+    </div>
+  </div>
+</div>
+<script>
+const input=document.getElementById('optionInput');
+const addBtn=document.getElementById('addBtn');
+const spinBtn=document.getElementById('spinBtn');
+const clearBtn=document.getElementById('clearBtn');
+const optionList=document.getElementById('optionList');
+const result=document.getElementById('result');
+const wheel=document.getElementById('wheel');
+const ctx=wheel.getContext('2d');
+let options=['Spaziergang','Kino','Essen gehen'];
+let rotation=0;
+let spinning=false;
+function renderList(){optionList.innerHTML=options.length?options.map((o,i)=>`<span class="pill">${o}<button data-i="${i}">×</button></span>`).join(''):'<div class="small">Noch keine Optionen vorhanden.</div>';document.querySelectorAll('.pill button').forEach(b=>b.onclick=()=>{options.splice(+b.dataset.i,1);renderWheel();renderList();});}
+function drawWheel(){const w=wheel.width,h=wheel.height,cx=w/2,cy=h/2,r=w/2-20;ctx.clearRect(0,0,w,h);if(!options.length){ctx.fillStyle='#0b1324';ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#9fb0d0';ctx.font='bold 34px system-ui';ctx.textAlign='center';ctx.fillText('Optionen hinzufügen',cx,cy);return;}const colors=['#60a5fa','#6ee7b7','#f59e0b','#f472b6','#a78bfa','#22c55e','#fb7185','#38bdf8'];const slice=(Math.PI*2)/options.length;for(let i=0;i<options.length;i++){const start=-Math.PI/2+i*slice;const end=start+slice;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.save();ctx.translate(cx,cy);ctx.rotate(start+slice/2);ctx.fillStyle='#08111f';ctx.font='bold 28px system-ui';ctx.textAlign='right';ctx.fillText(options[i],r-28,10);ctx.restore();}ctx.beginPath();ctx.arc(cx,cy,70,0,Math.PI*2);ctx.fillStyle='#07111f';ctx.fill();}
+function renderWheel(){drawWheel();renderList();}
+function addOption(){const val=input.value.trim();if(!val)return;options.push(val);input.value='';renderWheel();}
+addBtn.onclick=addOption;input.addEventListener('keydown',e=>{if(e.key==='Enter')addOption();});clearBtn.onclick=()=>{options=[];result.textContent='Alle Optionen gelöscht.';renderWheel();};spinBtn.onclick=()=>{if(spinning||options.length<2)return;spinning=true;const idx=Math.floor(Math.random()*options.length);const slice=360/options.length;const target=360*6-(idx*slice+slice/2);rotation+=target+Math.random()*25;wheel.style.transform=`rotate(${rotation}deg)`;setTimeout(()=>{result.textContent='Gewählt: ' + options[idx];spinning=false;},4200);};renderWheel();
+</script>
+</body>
+</html>
