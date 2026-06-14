@@ -47,7 +47,13 @@
       <div class="open">Tool öffnen →</div>
     </a>
   </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="badge">Erinnerungen</div>
+    <h2>Letzte Kalendereinträge</h2>
+    <div id="homeReminders" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;color:#9fb0d0"></div>
+  </div>
   <div class="note">Lege die verlinkten HTML-Dateien im selben GitHub-Repository ab, dann funktionieren die Klicks direkt.</div>
 </div>
-</body>
+<script>const homeReminders=document.getElementById('homeReminders');function renderHomeReminders(){if(!homeReminders)return;const items=JSON.parse(localStorage.getItem('janiks_life_changing_tool_home_reminders')||'[]');homeReminders.innerHTML=items.length?items.slice(-5).reverse().map(x=>`<div style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04)"><strong>${x.date}</strong><div>${x.title||'Ohne Titel'}</div><div style="opacity:.8">${x.text||''}</div></div>`).join(''):'<div>Keine Erinnerungen vorhanden.</div>'}renderHomeReminders();setInterval(renderHomeReminders,2000);</script></body>
 </html>
