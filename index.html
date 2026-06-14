@@ -7,12 +7,17 @@
 <style>
 :root{--bg:#07111f;--card:#0d1a2b;--line:rgba(255,255,255,.12);--text:#e8eefc;--muted:#9fb0d0;--accent:#6ee7b7;--accent2:#60a5fa;--accent3:#f59e0b}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#12213d,#07111f 50%);color:var(--text);min-height:100vh}a{text-decoration:none;color:inherit}
-.wrap{max-width:1100px;margin:0 auto;padding:32px}.hero{padding:28px 24px 10px}.title{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 8px}.subtitle{color:var(--muted);margin:0;max-width:760px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:32px}
+.hero{padding:28px 24px 10px}.title{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 8px}.subtitle{color:var(--muted);margin:0;max-width:760px;line-height:1.5}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:26px}
 .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.25);transition:.18s transform,.18s border-color,.18s background;cursor:pointer;min-height:190px;display:flex;flex-direction:column}.card:hover{transform:translateY(-3px);border-color:rgba(110,231,183,.45);background:linear-gradient(180deg,rgba(110,231,183,.12),rgba(255,255,255,.03))}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.26);color:#cfe3ff;font-size:.92rem;margin-bottom:14px;width:max-content}.card h2{margin:0 0 8px;font-size:1.3rem}.card p{margin:0;color:var(--muted);line-height:1.5;flex:1}.open{margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:rgba(110,231,183,.14);border:1px solid rgba(110,231,183,.28);color:#dffef2;font-weight:700;width:max-content}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.26);color:#cfe3ff;font-size:.92rem;margin-bottom:14px;width:max-content}.card h2{margin:0 0 8px;font-size:1.3rem}.card p{margin:0;color:var(--muted);line-height:1.5;flex:1}
+.open{margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:rgba(110,231,183,.14);border:1px solid rgba(110,231,183,.28);color:#dffef2;font-weight:700;width:max-content}
+.finance{--c:var(--accent)}.calendar{--c:var(--accent2)}.gamble{--c:var(--accent3)}
+.finance .badge,.finance:hover{border-color:rgba(110,231,183,.35)}
+.calendar .badge,.calendar:hover{border-color:rgba(96,165,250,.35)}
+.gamble .badge,.gamble:hover{border-color:rgba(245,158,11,.35)}
 .finance .badge{background:rgba(110,231,183,.14)}.calendar .badge{background:rgba(96,165,250,.14)}.gamble .badge{background:rgba(245,158,11,.14)}
-.finance:hover{border-color:rgba(110,231,183,.35)}.calendar:hover{border-color:rgba(96,165,250,.35)}.gamble:hover{border-color:rgba(245,158,11,.35)}
 .note{margin-top:24px;color:var(--muted);font-size:.95rem}
 </style>
 </head>
@@ -42,7 +47,13 @@
       <div class="open">Tool öffnen →</div>
     </a>
   </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="badge">Erinnerungen</div>
+    <h2>Letzte Kalendereinträge</h2>
+    <div id="homeReminders" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;color:#9fb0d0"></div>
+  </div>
   <div class="note">Lege die verlinkten HTML-Dateien im selben GitHub-Repository ab, dann funktionieren die Klicks direkt.</div>
 </div>
-</body>
+<script>const homeReminders=document.getElementById('homeReminders');function renderHomeReminders(){if(!homeReminders)return;const items=JSON.parse(localStorage.getItem('janiks_life_changing_tool_home_reminders')||'[]');homeReminders.innerHTML=items.length?items.slice(-5).reverse().map(x=>`<div style="padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04)"><strong>${x.date}</strong><div>${x.title||'Ohne Titel'}</div><div style="opacity:.8">${x.text||''}</div></div>`).join(''):'<div>Keine Erinnerungen vorhanden.</div>'}renderHomeReminders();setInterval(renderHomeReminders,2000);</script></body>
 </html>
