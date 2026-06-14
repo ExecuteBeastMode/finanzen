@@ -1,466 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
-  <title>Finanz Tool</title>
-  <style>
-    :root{--bg:#050816;--text:#f8fafc;--line:rgba(255,255,255,.10);--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);--safe-left:env(safe-area-inset-left);--safe-right:env(safe-area-inset-right)}
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at top left,rgba(139,92,246,.35),transparent 24%),radial-gradient(circle at top right,rgba(34,211,238,.22),transparent 20%),radial-gradient(circle at 50% 100%,rgba(251,191,36,.18),transparent 25%),linear-gradient(180deg,#050816,#0b1020 45%,#10172a)}
-    body::before{content:'';position:fixed;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.04),transparent 35%,rgba(255,255,255,.02));pointer-events:none}
-    .wrap{max-width:1120px;margin:0 auto;padding:calc(18px + var(--safe-top)) calc(14px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(14px + var(--safe-left))}
-    .hero{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px} h1{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.04em;line-height:.95} .sub{color:#c7d2fe;margin-top:10px;font-size:1rem;max-width:56ch}
-    .topline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chip{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);font-weight:700;font-size:.92rem}
-    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}.tab-btn{padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);cursor:pointer}.tab-btn.active{background:linear-gradient(135deg,#8b5cf6,#22d3ee);box-shadow:0 14px 24px rgba(34,211,238,.18)}
-    .tab-panel{display:none}.tab-panel.active{display:block}
-    .grid{display:grid;grid-template-columns:1.2fr 1fr 1fr .9fr;gap:14px;margin:18px 0 22px}
-    .card,.panel{background:linear-gradient(180deg,rgba(15,23,42,.68),rgba(15,23,42,.42));border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 60px rgba(0,0,0,.38);backdrop-filter:blur(24px);overflow:hidden}
-    .card{padding:18px}
-    .label{color:#cbd5e1;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}.value{font-size:1.9rem;font-weight:900;margin-top:12px}.trend{margin-top:10px;font-size:.92rem;color:#dbeafe;opacity:.9}
-    .panel{padding:18px}
-    .row{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px}
-    input,select,button{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(2,6,23,.62);color:var(--text);padding:14px 14px;font-size:16px;min-height:52px;outline:none}
-    input::placeholder{color:#94a3b8} input:focus,select:focus{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 4px rgba(34,211,238,.12)}
-    button{cursor:pointer;border:none;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399);box-shadow:0 16px 30px rgba(34,211,238,.18);transition:.18s ease} button:hover{transform:translateY(-1px);filter:saturate(1.06)}
-    .quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.qbtn{padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer}
-    .content{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
-    .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h2{margin:0;font-size:1.1rem}
-    .list{margin:0;padding:0;list-style:none}.item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}.delbtn{width:38px;min-width:38px;min-height:38px;border-radius:12px;background:rgba(251,113,133,.18);border:1px solid rgba(251,113,133,.35);box-shadow:none;padding:0;font-size:1rem}
-    .item:last-child{border-bottom:none}.left{display:flex;align-items:center;gap:12px;min-width:0}.badge{display:inline-flex;align-items:center;justify-content:center;min-width:112px;padding:9px 12px;border-radius:999px;font-size:.86rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 10px 20px rgba(0,0,0,.18)}.meta{color:#cbd5e1;font-size:.9rem;margin-top:4px}.amt.income{color:#86efac;font-weight:900}.amt.expense{color:#fda4af;font-weight:900}
-    .empty{color:#94a3b8;padding:10px 0}.chart{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;height:230px;margin-top:12px;padding-top:4px}.barwrap{display:flex;flex-direction:column;align-items:center;gap:8px}.bar{width:100%;min-height:18px;border-radius:16px 16px 8px 8px;box-shadow:0 14px 28px rgba(0,0,0,.22)}.barlabel{font-size:.78rem;color:#cbd5e1;text-align:center;line-height:1.2}
-    .footer{margin-top:16px;color:#94a3b8;font-size:.9rem}
-    .keypad-modal{position:fixed;inset:0;background:rgba(2,6,23,.72);display:none;align-items:end;justify-content:center;padding:16px;z-index:50}.keypad-modal.open{display:flex}
-    .keypad-sheet{width:min(460px,100%);background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(15,23,42,.86));border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.5);backdrop-filter:blur(24px);padding:16px}
-    .keypad-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.pad-close{width:42px;min-height:42px;border-radius:12px;background:rgba(255,255,255,.06)}
-    .pad-display{width:100%;font-size:1.7rem;font-weight:900;text-align:right;padding:14px 16px;margin-bottom:12px;border-radius:18px;background:rgba(255,255,255,.05)}
-    .pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.pad-key{min-height:64px;font-size:1.35rem;background:rgba(255,255,255,.06)}.pad-action{background:rgba(139,92,246,.28)}
-    .preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.preset-btn{min-height:46px;font-size:1rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25)}
-    .pad-confirm{margin-top:12px;background:linear-gradient(135deg,#8b5cf6,#22d3ee 58%,#34d399)}
-    .fixed-table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:980px}.fixed-table th,.fixed-table td{padding:10px 8px;text-align:center}.fixed-table th{font-size:.8rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:.08em}.fixed-table td{transition:.15s ease}.fixed-table .catcell{font-weight:900;position:relative}.fixed-table .catbox{display:block;padding:10px 12px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04);text-align:left}.fixed-table .cellbox{position:relative;min-height:44px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;overflow:hidden}.fixed-table .cellvalue{font-weight:800;color:#e2e8f0;pointer-events:none}.cellactions{position:absolute;top:6px;right:6px;display:flex;gap:6px}.tiny{width:26px;min-width:26px;min-height:26px;border-radius:9px;padding:0;line-height:1;box-shadow:none;font-size:.8rem}.tiny.add{background:rgba(52,211,153,.18);border:1px solid rgba(52,211,153,.35)}.tiny.del{background:rgba(251,113,133,.18);border:1px solid rgba(251,113,133,.35)}.sum-row td{font-weight:900;color:#e2e8f0}.sum-row td:first-child{text-align:left}
-    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}.smallrow{display:flex;gap:10px;flex-wrap:wrap}.smallrow button{width:auto;min-width:180px}
-    @media (max-width:980px){.grid,.content{grid-template-columns:1fr 1fr}.content{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.row{grid-template-columns:1fr 1fr}.row button{grid-column:1/-1}.grid{grid-template-columns:1fr}.chart{height:180px}.badge{min-width:92px}.smallrow button{min-width:unset;flex:1}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Janiks Life Changing Tool</title>
+<style>
+:root{--bg:#07111f;--card:#0d1a2b;--line:rgba(255,255,255,.12);--text:#e8eefc;--muted:#9fb0d0;--accent:#6ee7b7;--accent2:#60a5fa;--accent3:#f59e0b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#12213d,#07111f 50%);color:var(--text);min-height:100vh}a{text-decoration:none;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:32px}
+.hero{padding:28px 24px 10px}.title{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 8px}.subtitle{color:var(--muted);margin:0;max-width:760px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:26px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.25);transition:.18s transform,.18s border-color,.18s background;cursor:pointer;min-height:190px;display:flex;flex-direction:column}.card:hover{transform:translateY(-3px);border-color:rgba(110,231,183,.45);background:linear-gradient(180deg,rgba(110,231,183,.12),rgba(255,255,255,.03))}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.26);color:#cfe3ff;font-size:.92rem;margin-bottom:14px;width:max-content}.card h2{margin:0 0 8px;font-size:1.3rem}.card p{margin:0;color:var(--muted);line-height:1.5;flex:1}
+.open{margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:rgba(110,231,183,.14);border:1px solid rgba(110,231,183,.28);color:#dffef2;font-weight:700;width:max-content}
+.finance{--c:var(--accent)}.calendar{--c:var(--accent2)}.gamble{--c:var(--accent3)}
+.finance .badge,.finance:hover{border-color:rgba(110,231,183,.35)}
+.calendar .badge,.calendar:hover{border-color:rgba(96,165,250,.35)}
+.gamble .badge,.gamble:hover{border-color:rgba(245,158,11,.35)}
+.finance .badge{background:rgba(110,231,183,.14)}.calendar .badge{background:rgba(96,165,250,.14)}.gamble .badge{background:rgba(245,158,11,.14)}
+.note{margin-top:24px;color:var(--muted);font-size:.95rem}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <div>
-        <h1>Finanz Tool</h1>
-        <div class="sub">Ein ruhiges Dashboard zum Tracken deiner Ausgaben — mit jährlichen Fixkosten, farbigen Kategorien und Undo für die letzte Änderung.</div>
-        <div class="topline">
-          <div class="chip">⚡ Quick Add</div>
-          <div class="chip">🎨 Premium UI</div>
-          <div class="chip">📱 Optimiert für iPhone</div>
-        </div>
-      </div>
-      <div class="chip">💾 localStorage</div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-      <button class="tab-btn" data-tab="fixkosten">Fixkosten jährlich</button>
-    </div>
-
-    <div class="tab-panel active" id="dashboardTab">
-      <div class="grid">
-        <div class="card"><div class="label">Balance</div><div class="value" id="balance">0,00 €</div><div class="trend" id="balanceTrend">Alles im grünen Bereich</div></div>
-        <div class="card"><div class="label">Einnahmen</div><div class="value" id="income">0,00 €</div><div class="trend">Gesamte Geldeingänge</div></div>
-        <div class="card"><div class="label">Ausgaben</div><div class="value" id="expense">0,00 €</div><div class="trend">Deine Kosten im Blick</div></div>
-        <div class="card"><div class="label">Einträge</div><div class="value" id="count">0</div><div class="trend">Alle Buchungen</div></div>
-      </div>
-
-      <div class="panel">
-        <div class="sectiontitle"><h2>Schneller Eintrag</h2><span class="chip">1-Tap Kategorien</span></div>
-        <div class="row">
-          <select id="title">
-            <option value="" selected disabled>Beschreibung wählen</option>
-            <option value="Tanken">Tanken</option>
-            <option value="Einkaufen">Einkaufen</option>
-            <option value="Sonstiges">Sonstiges</option>
-            <option value="Unternehmungen">Unternehmungen</option>
-            <option value="Kaufrausch">Kaufrausch</option>
-          </select>
-          <input id="amount" type="text" inputmode="decimal" placeholder="Betrag" readonly />
-          <select id="type"><option value="expense">Ausgabe</option><option value="income">Einnahme</option></select>
-          <button id="addBtn">Hinzufügen</button>
-        </div>
-        <div class="quick">
-          <button class="qbtn" data-cat="Tanken">⛽ Tanken</button>
-          <button class="qbtn" data-cat="Einkaufen">🛒 Einkaufen</button>
-          <button class="qbtn" data-cat="Unternehmungen">🎉 Unternehmungen</button>
-          <button class="qbtn" data-cat="Kaufrausch">🛍️ Kaufrausch</button>
-          <button class="qbtn" data-cat="Sonstiges">✨ Sonstiges</button>
-          <button class="qbtn" id="undoBtn">↩️ Undo</button>
-        </div>
-      </div>
-
-      <div id="keypadModal" class="keypad-modal" aria-hidden="true">
-        <div class="keypad-sheet">
-          <div class="keypad-head">
-            <strong>Betrag eingeben</strong>
-            <button type="button" id="closePad" class="pad-close">✕</button>
-          </div>
-          <input id="padDisplay" class="pad-display" type="text" inputmode="decimal" readonly />
-          <div class="pad-grid">
-            <button type="button" class="pad-key">1</button><button type="button" class="pad-key">2</button><button type="button" class="pad-key">3</button>
-            <button type="button" class="pad-key">4</button><button type="button" class="pad-key">5</button><button type="button" class="pad-key">6</button>
-            <button type="button" class="pad-key">7</button><button type="button" class="pad-key">8</button><button type="button" class="pad-key">9</button>
-            <button type="button" class="pad-key pad-action" data-action="dot">,</button><button type="button" class="pad-key">0</button><button type="button" class="pad-key pad-action" data-action="del">⌫</button>
-          </div>
-          <div class="preset-row">
-            <button type="button" class="preset-btn" data-preset=",00">,00</button>
-            <button type="button" class="preset-btn" data-preset=",99">,99</button>
-            <button type="button" class="preset-btn" data-preset=",50">,50</button>
-          </div>
-          <button type="button" id="confirmPad" class="pad-confirm">Übernehmen</button>
-        </div>
-      </div>
-
-      <div class="content">
-        <div class="panel">
-          <div class="sectiontitle"><h2>Transaktionen</h2><span class="chip" id="latestCount">0 Buchungen</span></div>
-          <ul class="list" id="list"></ul>
-          <div class="footer">Die Daten bleiben im Browser gespeichert.</div>
-        </div>
-        <div class="panel">
-          <div class="sectiontitle"><h2>Kategorie Chart</h2><span class="chip">Ausgaben</span></div>
-          <div class="chart" id="chart"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="fixkostenTab">
-      <div class="panel">
-        <div class="panel-head">
-          <div class="sectiontitle" style="margin:0"><h2>Kategorien</h2><span class="chip">Tippen zum Bearbeiten</span></div>
-          <div class="smallrow">
-            <button id="openCatManagerBtn">Kategorien bearbeiten</button>
-            <button id="addYearRowBtn">+ Zeile hinzufügen</button>
-            <button id="yearUndoBtn">↩️ Undo letzte Änderung</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="fixed-table">
-            <thead>
-              <tr><th> </th><th>Jan</th><th>Feb</th><th>Mär</th><th>Apr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Dez</th><th>Jahr</th></tr>
-            </thead>
-            <tbody id="fixedBody"></tbody>
-            <tfoot>
-              <tr class="sum-row"><td>Monatssumme</td><td id="m1">0,00 €</td><td id="m2">0,00 €</td><td id="m3">0,00 €</td><td id="m4">0,00 €</td><td id="m5">0,00 €</td><td id="m6">0,00 €</td><td id="m7">0,00 €</td><td id="m8">0,00 €</td><td id="m9">0,00 €</td><td id="m10">0,00 €</td><td id="m11">0,00 €</td><td id="m12">0,00 €</td><td id="yearTotal">0,00 €</td></tr>
-            </tfoot>
-          </table>
-        </div>
-        <div class="footer">Klicke auf eine Zelle, um Kategorie und Betrag zu bearbeiten. Mit x löscht du die Zeile.</div>
-      </div>
-
-      <div id="catManagerModal" class="keypad-modal" aria-hidden="true">
-        <div class="keypad-sheet">
-          <div class="keypad-head">
-            <strong>Kategorien bearbeiten</strong>
-            <button type="button" id="closeCatManager" class="pad-close">✕</button>
-          </div>
-          <div class="smallrow" style="margin-bottom:10px">
-            <input id="newCategoryName" class="mini" placeholder="Kategorie hinzufügen">
-            <button type="button" id="addCategoryBtn">+</button>
-          </div>
-          <div id="catManagerList" style="display:grid;gap:10px;max-height:360px;overflow:auto"></div>
-        </div>
-      </div>
-
-      <div id="fixedModal" class="keypad-modal" aria-hidden="true">
-        <div class="keypad-sheet">
-          <div class="keypad-head">
-            <strong>Jährliche Fixkosten</strong>
-            <button type="button" id="closeFixedPad" class="pad-close">✕</button>
-          </div>
-          <div class="fixed-cat-title" id="fixedCatTitle">Kategorie</div>
-          <select id="fixedCategorySelect" class="pad-display" style="text-align:left;font-size:1rem;font-weight:700;height:auto;min-height:52px"></select>
-          <input id="fixedPadDisplay" class="pad-display" type="text" inputmode="decimal" placeholder="Betrag" />
-          <div class="smallrow" style="margin-top:10px">
-            <input id="newFixedCategoryName" class="mini" placeholder="Kategorie frei benennen">
-            <button type="button" id="addFixedCategoryBtn">+</button>
-          </div>
-          <button type="button" id="saveFixedPad" class="pad-confirm">Übernehmen</button>
-        </div>
-      </div>
-    </div>
+<div class="wrap">
+  <div class="hero">
+    <h1 class="title">Janiks Life Changing Tool</h1>
+    <p class="subtitle">Wähle ein Tool aus. Beim Klick wird das jeweilige Tool geöffnet.</p>
   </div>
-
-  <script>
-    const balanceEl = document.getElementById('balance');
-    const balanceTrendEl = document.getElementById('balanceTrend');
-    const incomeEl = document.getElementById('income');
-    const expenseEl = document.getElementById('expense');
-    const countEl = document.getElementById('count');
-    const latestCountEl = document.getElementById('latestCount');
-    const listEl = document.getElementById('list');
-    const chartEl = document.getElementById('chart');
-    const titleEl = document.getElementById('title');
-    const amountEl = document.getElementById('amount');
-    const typeEl = document.getElementById('type');
-    const addBtn = document.getElementById('addBtn');
-    const undoBtn = document.getElementById('undoBtn');
-    const keypadModal = document.getElementById('keypadModal');
-    const padDisplay = document.getElementById('padDisplay');
-    const closePad = document.getElementById('closePad');
-    const confirmPad = document.getElementById('confirmPad');
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const dashboardTab = document.getElementById('dashboardTab');
-    const fixkostenTab = document.getElementById('fixkostenTab');
-    const fixedBody = document.getElementById('fixedBody');
-    const monthCells = Array.from({length:12}, (_,i)=>document.getElementById('m'+(i+1)));
-    const yearTotalEl = document.getElementById('yearTotal');
-    const fixedModal = document.getElementById('fixedModal');
-    const closeFixedPad = document.getElementById('closeFixedPad');
-    const saveFixedPad = document.getElementById('saveFixedPad');
-    const fixedPadDisplay = document.getElementById('fixedPadDisplay');
-    const fixedCatTitle = document.getElementById('fixedCatTitle');
-    const fixedCategorySelect = document.getElementById('fixedCategorySelect');
-    const newFixedCategoryName = document.getElementById('newFixedCategoryName');
-    const addFixedCategoryBtn = document.getElementById('addFixedCategoryBtn');
-    const addYearRowBtn = document.getElementById('addYearRowBtn');
-    const yearUndoBtn = document.getElementById('yearUndoBtn');
-    const openCatManagerBtn = document.getElementById('openCatManagerBtn');
-    const catManagerModal = document.getElementById('catManagerModal');
-    const closeCatManager = document.getElementById('closeCatManager');
-    const newCategoryName = document.getElementById('newCategoryName');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const catManagerList = document.getElementById('catManagerList');
-
-    const STORAGE_KEY = 'expense-tracker-items';
-    const fixedKey = 'fixed-costs-items';
-    const fixedHistoryKey = 'fixed-history';
-
-    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let history = [];
-    let padValue = '';
-    const fixedColors = ['#8b5cf6','#22d3ee','#34d399','#fbbf24','#fb7185','#60a5fa','#f97316','#a78bfa'];
-    const fixedCategoriesDefault = ['Auto','Autoversicherung','Autosteuer','GEZ','Urlaub','Versicherung'];
-
-    let fixedRows = JSON.parse(localStorage.getItem(fixedKey) || '[]');
-    let categoryOptions = JSON.parse(localStorage.getItem('yearly-category-options') || '[]');
-    if (!fixedRows.length) fixedRows = fixedCategoriesDefault.map((name, i) => ({id:crypto.randomUUID(), name, color:fixedColors[i % fixedColors.length], months:Array(12).fill(''), category:name}));
-    if (!categoryOptions.length) categoryOptions = fixedCategoriesDefault.slice();
-    fixedRows = fixedRows.map((r, i) => ({...r, id:r.id || crypto.randomUUID(), color:r.color || fixedColors[i % fixedColors.length], months:r.months || Array(12).fill(''), category:r.category || r.name}));
-    let fixedHistory = JSON.parse(localStorage.getItem(fixedHistoryKey) || '[]');
-
-    const cats = ['Tanken','Einkaufen','Sonstiges','Unternehmungen','Kaufrausch'];
-    const colors = {'Tanken':'linear-gradient(180deg,#f59e0b,#fb7185)','Einkaufen':'linear-gradient(180deg,#22c55e,#10b981)','Sonstiges':'linear-gradient(180deg,#8b5cf6,#22d3ee)','Unternehmungen':'linear-gradient(180deg,#ec4899,#f59e0b)','Kaufrausch':'linear-gradient(180deg,#06b6d4,#3b82f6)'};
-    const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(v);
-    const n = v => Number(String(v).replace(',', '.')) || 0;
-    const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    const saveFixed = () => localStorage.setItem(fixedKey, JSON.stringify(fixedRows));
-    const saveFixedHistory = () => localStorage.setItem(fixedHistoryKey, JSON.stringify(fixedHistory));
-    const saveCategories = () => localStorage.setItem('yearly-category-options', JSON.stringify(categoryOptions));
-    const snapshotFixed = () => { fixedHistory.push(JSON.stringify(fixedRows)); saveFixedHistory(); };
-
-    const openPad = () => { padValue = amountEl.value.replace('.', ','); padDisplay.value = padValue; keypadModal.classList.add('open'); keypadModal.setAttribute('aria-hidden','false'); };
-    const closePadFn = () => { keypadModal.classList.remove('open'); keypadModal.setAttribute('aria-hidden','true'); };
-    const syncPad = () => { padDisplay.value = padValue || ''; amountEl.value = padValue.replace(',', '.'); };
-
-    const renderChart = () => {
-      const totals = Object.fromEntries(cats.map(c=>[c,0]));
-      items.filter(i=>i.type==='expense').forEach(i=>{ if(totals[i.title] != null) totals[i.title] += i.amount; });
-      const max = Math.max(...Object.values(totals), 1);
-      chartEl.innerHTML = '';
-      cats.forEach(cat => {
-        const h = Math.max(16, (totals[cat] / max) * 160);
-        const div = document.createElement('div');
-        div.className = 'barwrap';
-        div.innerHTML = `<div class="bar" style="height:${h}px;background:${colors[cat]}"></div><div class="barlabel">${cat}<br>${eur(totals[cat])}</div>`;
-        chartEl.appendChild(div);
-      });
-    };
-
-    let activeFixed = null;
-
-    function renderFixedSelect(){
-      fixedCategorySelect.innerHTML = categoryOptions.map((c, i) => `<option value="${c}">${c}</option>`).join('') + '<option value="new">+ frei benennen</option>';
-    }
-    function renderCatManager(){
-      catManagerList.innerHTML = categoryOptions.map((c, i) => `<div class="smallrow"><input class="mini" data-catidx="${i}" value="${c}"><button class="delbtn" data-del-cat="${i}">x</button></div>`).join('');
-    }
-
-    function renderFixed(){
-      fixedBody.innerHTML = '';
-      fixedRows.forEach((row, rIndex) => {
-        const tr = document.createElement('tr');
-        tr.dataset.row = rIndex;
-        const cells = [`<td class="catcell"><button class="catbox" data-act="editcat" data-r="${rIndex}" style="border-color:${row.color};box-shadow:inset 0 0 0 1px ${row.color}33">${row.name || 'Keine Kategorie'}</button><button class="delbtn" data-act="delrow" data-r="${rIndex}" style="position:absolute;top:6px;right:6px;width:30px;min-width:30px;min-height:30px;border-radius:10px;font-size:.85rem">x</button></td>`];
-        for (let i=0;i<12;i++) {
-          const val = row.months[i] || '';
-          cells.push(`<td><div class="cellbox" data-r="${rIndex}" data-c="${i}" style="border-color:${val ? row.color : 'transparent'};box-shadow:${val ? '0 0 0 2px ' + row.color + '66 inset' : 'none'}"><span class="cellvalue">${val ? eur(n(val)) : ''}</span><div class="cellactions"><button class="tiny add" data-act="edit" data-r="${rIndex}" data-c="${i}">+</button><button class="tiny del" data-act="delcell" data-r="${rIndex}" data-c="${i}">x</button></div></div></td>`);
-        }
-        const yearly = row.months.reduce((s,v)=>s+n(v),0);
-        cells.push(`<td>${eur(yearly)}</td>`);
-        tr.innerHTML = cells.join('');
-        fixedBody.appendChild(tr);
-      });
-      const totals = Array(12).fill(0);
-      fixedRows.forEach(row => row.months.forEach((v,i)=>totals[i]+=n(v)));
-      const totalYear = totals.reduce((a,b)=>a+b,0);
-      monthCells.forEach((el,i)=>el.textContent = eur(totals[i]));
-      yearTotalEl.textContent = eur(totalYear);
-      renderFixedSelect();
-    }
-
-    function render(){
-      const income = items.filter(i => i.type === 'income').reduce((s,i)=>s+i.amount,0);
-      const expense = items.filter(i => i.type === 'expense').reduce((s,i)=>s+i.amount,0);
-      const monthlyFixed = fixedRows.reduce((s,row)=>s + row.months.reduce((a,v)=>a+n(v),0)/12, 0);
-      const balance = income - expense - monthlyFixed;
-      balanceEl.textContent = eur(balance);
-      balanceTrendEl.textContent = balance >= 0 ? 'Nach Fixkosten stabil' : 'Achte auf deine Fixkosten';
-      incomeEl.textContent = eur(income);
-      expenseEl.textContent = eur(expense);
-      countEl.textContent = items.length;
-      latestCountEl.textContent = `${items.length} Buchungen`;
-      listEl.innerHTML = items.length ? '' : '<li class="empty">Noch keine Einträge vorhanden.</li>';
-      items.slice().reverse().forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'item';
-        li.innerHTML = `<div class="left"><div class="badge" style="background:${colors[item.title] || 'linear-gradient(135deg,#64748b,#334155)'}">${item.title}</div><div><strong>${item.type === 'income' ? 'Einnahme' : 'Ausgabe'}</strong><div class="meta">${new Date(item.date).toLocaleDateString('de-DE')}</div></div></div><div style="display:flex;align-items:center;gap:10px"><div class="amt ${item.type}">${item.type === 'income' ? '+' : '-'} ${eur(item.amount)}</div><button class="delbtn" data-id="${item.id}">x</button></div>`;
-        listEl.appendChild(li);
-      });
-      renderChart();
-      renderFixed();
-    }
-
-    function pushFixedSnapshot(){ snapshotFixed(); }
-
-    function openFixedEditor(r, c){
-      activeFixed = {r, c};
-      const row = fixedRows[r];
-      fixedCatTitle.textContent = row.name + ' · Monat ' + (c + 1);
-      fixedCategorySelect.value = row.category || row.name;
-      fixedPadDisplay.value = row.months[c] || '';
-      fixedModal.classList.add('open');
-      fixedModal.setAttribute('aria-hidden','false');
-    }
-
-    function addFixedRow(name='Neue Kategorie'){
-      pushFixedSnapshot();
-      fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name});
-      if (!categoryOptions.includes(name)) { categoryOptions.push(name); saveCategories(); }
-      saveFixed();
-      renderFixed();
-      render();
-    }
-
-    function undoFixed(){
-      if (!fixedHistory.length) return;
-      fixedRows = JSON.parse(fixedHistory.pop());
-      saveFixedHistory();
-      saveFixed();
-      renderFixed();
-      render();
-    }
-
-    function commitFixedEdit(){
-      if (!activeFixed) return;
-      const idx = fixedCategorySelect.value === 'new' ? activeFixed.r : +fixedCategorySelect.value;
-      if (idx == null || Number.isNaN(idx)) return;
-      pushFixedSnapshot();
-      const amount = fixedPadDisplay.value.trim();
-      const cat = fixedCategorySelect.value === 'new' ? (newFixedCategoryName.value.trim() || 'Neue Kategorie') : fixedCategorySelect.value;
-      fixedRows[idx].name = cat;
-      fixedRows[idx].category = cat;
-      fixedRows[idx].months[activeFixed.c] = amount;
-      if (!categoryOptions.includes(cat) && cat !== 'Neue Kategorie') { categoryOptions.push(cat); saveCategories(); }
-      saveFixed();
-      renderFixed();
-      render();
-      fixedModal.classList.remove('open');
-      fixedModal.setAttribute('aria-hidden','true');
-    }
-
-    function deleteFixedCell(r, c){
-      pushFixedSnapshot();
-      fixedRows[r].months[c] = '';
-      saveFixed();
-      renderFixed();
-      render();
-    }
-
-    function deleteFixedRow(r){
-      if (fixedRows.length <= 1) return;
-      pushFixedSnapshot();
-      fixedRows.splice(r, 1);
-      saveFixed();
-      renderFixed();
-      render();
-    }
-
-    addBtn.addEventListener('click', () => {
-      const title = titleEl.value.trim();
-      const amount = Number(String(amountEl.value).replace(',', '.'));
-      const type = typeEl.value;
-      if (!title || !amount || amount <= 0) return;
-      history.push(JSON.stringify(items));
-      items.push({ id: crypto.randomUUID(), title, amount, type, date: new Date().toISOString() });
-      save();
-      titleEl.value = ''; amountEl.value = ''; padValue = ''; closePadFn(); titleEl.focus();
-      render();
-    });
-
-    amountEl.addEventListener('click', openPad);
-    [titleEl, amountEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn.click(); }));
-    document.querySelectorAll('.qbtn').forEach(btn => btn.addEventListener('click', () => { if (btn.id !== 'undoBtn') titleEl.value = btn.dataset.cat; amountEl.focus(); }));
-    undoBtn.addEventListener('click', () => { if (!history.length) return; items = JSON.parse(history.pop()); save(); render(); });
-    closePad.addEventListener('click', closePadFn);
-    keypadModal.addEventListener('click', e => { if (e.target === keypadModal) closePadFn(); });
-
-    document.querySelectorAll('.pad-key').forEach(k => k.addEventListener('click', () => {
-      const t = k.textContent.trim();
-      const action = k.dataset.action;
-      if (action === 'del') padValue = padValue.slice(0,-1);
-      else if (action === 'dot') { if (!padValue.includes(',') && !padValue.includes('.')) padValue += ','; }
-      else padValue += t;
-      syncPad();
-    }));
-    document.querySelectorAll('.preset-btn').forEach(b => b.addEventListener('click', () => {
-      const base = padDisplay.value.replace(/[,\.].*$/, '');
-      padValue = base + b.dataset.preset;
-      syncPad();
-    }));
-    confirmPad.addEventListener('click', () => { syncPad(); closePadFn(); amountEl.focus(); });
-
-    fixedBody.addEventListener('click', e => {
-      const rowDel = e.target.closest('[data-act="delrow"]');
-      if (rowDel) { deleteFixedRow(+rowDel.dataset.r); return; }
-      const delCell = e.target.closest('[data-act="delcell"]');
-      if (delCell) { deleteFixedCell(+delCell.dataset.r, +delCell.dataset.c); return; }
-      const editCell = e.target.closest('[data-act="edit"]');
-      if (editCell) { openFixedEditor(+editCell.dataset.r, +editCell.dataset.c); return; }
-      const catEdit = e.target.closest('[data-act="editcat"]');
-      if (catEdit) { openFixedEditor(+catEdit.dataset.r, 0); return; }
-      const box = e.target.closest('.cellbox');
-      if (!box) return;
-      openFixedEditor(+box.dataset.r, +box.dataset.c);
-    });
-
-    fixedModal.addEventListener('click', e => { if (e.target === fixedModal) { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); } });
-    closeFixedPad.addEventListener('click', () => { fixedModal.classList.remove('open'); fixedModal.setAttribute('aria-hidden','true'); });
-    openCatManagerBtn.addEventListener('click', () => { renderCatManager(); catManagerModal.classList.add('open'); });
-    closeCatManager.addEventListener('click', () => { catManagerModal.classList.remove('open'); });
-    catManagerModal.addEventListener('click', e => { if (e.target === catManagerModal) catManagerModal.classList.remove('open'); });
-    catManagerList.addEventListener('input', e => { const i = e.target.dataset.catidx; if (i == null) return; categoryOptions[i] = e.target.value; saveCategories(); renderFixedSelect(); renderFixed(); });
-    catManagerList.addEventListener('click', e => { const d = e.target.closest('[data-del-cat]'); if (!d) return; const i = +d.dataset.delCat; categoryOptions.splice(i,1); saveCategories(); renderCatManager(); renderFixedSelect(); renderFixed(); });
-    addCategoryBtn.addEventListener('click', () => { const name = newCategoryName.value.trim(); if (!name) return; categoryOptions.push(name); saveCategories(); newCategoryName.value=''; renderCatManager(); renderFixedSelect(); });
-    fixedCategorySelect.addEventListener('change', () => { if (fixedCategorySelect.value === 'new') newFixedCategoryName.focus(); else { fixedCatTitle.textContent = fixedCategorySelect.value; } });
-    addFixedCategoryBtn.addEventListener('click', () => { const name = newFixedCategoryName.value.trim(); if (!name) return; pushFixedSnapshot(); fixedRows.push({id:crypto.randomUUID(), name, color:fixedColors[fixedRows.length % fixedColors.length], months:Array(12).fill(''), category:name}); if (!categoryOptions.includes(name)) { categoryOptions.push(name); saveCategories(); } saveFixed(); renderFixed(); render(); newFixedCategoryName.value=''; fixedCategorySelect.value = name; });
-    saveFixedPad.addEventListener('click', commitFixedEdit);
-    addYearRowBtn.addEventListener('click', () => addFixedRow('Neue Kategorie'));
-    yearUndoBtn.addEventListener('click', undoFixed);
-
-    listEl.addEventListener('click', e => { const b = e.target.closest('.delbtn'); if (!b) return; items = items.filter(x => x.id !== b.dataset.id); save(); render(); });
-    tabBtns.forEach(btn => btn.addEventListener('click', () => { tabBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; dashboardTab.classList.toggle('active', tab === 'dashboard'); fixkostenTab.classList.toggle('active', tab === 'fixkosten'); }));
-
-    renderFixedSelect();
-    renderCatManager();
-    renderFixed();
-    render();
-  </script>
+  <div class="grid">
+    <a class="card finance" href="janiks_life_changing_tool_finanz_base_sparkonto_monthtable.html">
+      <div class="badge">Finanztool</div>
+      <h2>Finanztool</h2>
+      <p>Dein Finanzbereich mit Sparkonto und Monatsübersicht.</p>
+      <div class="open">Tool öffnen →</div>
+    </a>
+    <a class="card calendar" href="calendar.html">
+      <div class="badge">Kalender</div>
+      <h2>Kalender</h2>
+      <p>Kalender-Ansicht für Termine, Aufgaben und Planung.</p>
+      <div class="open">Tool öffnen →</div>
+    </a>
+    <a class="card gamble" href="date_gamble.html">
+      <div class="badge">Date Gamble</div>
+      <h2>Date Gamble</h2>
+      <p>Spielbereich für dein Date-Gamble-Tool.</p>
+      <div class="open">Tool öffnen →</div>
+    </a>
+  </div>
+  <div class="note">Lege die verlinkten HTML-Dateien im selben GitHub-Repository ab, dann funktionieren die Klicks direkt.</div>
+</div>
 </body>
 </html>
