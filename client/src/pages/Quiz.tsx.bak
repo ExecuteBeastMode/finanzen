@@ -1,0 +1,572 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── FRAGEN-DATENBANK ──────────────────────────────────────────────────────
+interface Question {
+  question: string;
+  options: string[];
+  correct: number;
+  category: string;
+  difficulty: "leicht" | "mittel" | "schwer";
+  explanation?: string;
+}
+
+const ALL_QUESTIONS: Question[] = [
+  // ── GEOGRAPHIE ──
+  { question: "Was ist die Hauptstadt von Australien?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], correct: 2, category: "Geographie", difficulty: "mittel", explanation: "Canberra wurde 1913 als Kompromiss zwischen Sydney und Melbourne zur Hauptstadt gewählt." },
+  { question: "Welcher Fluss ist der längste der Welt?", options: ["Amazonas", "Nil", "Yangtze", "Mississippi"], correct: 1, category: "Geographie", difficulty: "leicht", explanation: "Der Nil ist mit ca. 6.650 km der längste Fluss der Welt." },
+  { question: "In welchem Land liegt der Mount Everest?", options: ["Indien", "China", "Nepal/China-Grenze", "Tibet"], correct: 2, category: "Geographie", difficulty: "leicht" },
+  { question: "Welches ist das flächenmäßig größte Land der Welt?", options: ["Kanada", "USA", "China", "Russland"], correct: 3, category: "Geographie", difficulty: "leicht" },
+  { question: "Durch wie viele Zeitzonen erstreckt sich Russland?", options: ["9", "11", "13", "15"], correct: 1, category: "Geographie", difficulty: "schwer", explanation: "Russland hat 11 Zeitzonen — mehr als jedes andere Land der Welt." },
+  { question: "Was ist die Hauptstadt von Kanada?", options: ["Toronto", "Vancouver", "Ottawa", "Montréal"], correct: 2, category: "Geographie", difficulty: "leicht" },
+  { question: "Welches Meer liegt zwischen Europa und Afrika?", options: ["Rotes Meer", "Schwarzes Meer", "Mittelmeer", "Nordmeer"], correct: 2, category: "Geographie", difficulty: "leicht" },
+  { question: "Auf welchem Kontinent liegt Ägypten?", options: ["Asien", "Europa", "Afrika", "Naher Osten"], correct: 2, category: "Geographie", difficulty: "leicht" },
+  { question: "Wie viele Länder hat Europa?", options: ["44", "47", "50", "53"], correct: 1, category: "Geographie", difficulty: "schwer", explanation: "Europa hat 47 Länder (nach Europarats-Definition), geografisch zählt man oft 44." },
+  { question: "Welches ist das kleinste Land der Welt?", options: ["Monaco", "San Marino", "Vatikanstadt", "Liechtenstein"], correct: 2, category: "Geographie", difficulty: "mittel" },
+
+  // ── GESCHICHTE ──
+  { question: "In welchem Jahr fiel die Berliner Mauer?", options: ["1987", "1988", "1989", "1990"], correct: 2, category: "Geschichte", difficulty: "leicht" },
+  { question: "Wer war der erste Kanzler der Bundesrepublik Deutschland?", options: ["Willy Brandt", "Konrad Adenauer", "Theodor Heuss", "Ludwig Erhard"], correct: 1, category: "Geschichte", difficulty: "mittel" },
+  { question: "In welchem Jahr begann der Erste Weltkrieg?", options: ["1912", "1913", "1914", "1915"], correct: 2, category: "Geschichte", difficulty: "leicht" },
+  { question: "Welche Stadt wurde 79 n. Chr. vom Vesuv begraben?", options: ["Rom", "Neapel", "Pompeji", "Herculaneum"], correct: 2, category: "Geschichte", difficulty: "leicht" },
+  { question: "Wer war Napoleon Bonaparte?", options: ["Englischer König", "Französischer Kaiser", "Russischer Zar", "Spanischer General"], correct: 1, category: "Geschichte", difficulty: "leicht" },
+  { question: "Wann wurde die Weimarer Republik gegründet?", options: ["1916", "1918", "1919", "1921"], correct: 2, category: "Geschichte", difficulty: "mittel" },
+  { question: "Wer entdeckte Amerika im Jahr 1492?", options: ["Amerigo Vespucci", "Vasco da Gama", "Christoph Kolumbus", "Ferdinand Magellan"], correct: 2, category: "Geschichte", difficulty: "leicht" },
+  { question: "In welchem Jahr endete der Zweite Weltkrieg in Europa?", options: ["1944", "1945", "1946", "1947"], correct: 1, category: "Geschichte", difficulty: "leicht" },
+  { question: "Wie hieß die erste Raumstation der Sowjetunion?", options: ["Mir", "Saljut 1", "Sputnik", "Kosmos"], correct: 1, category: "Geschichte", difficulty: "schwer", explanation: "Saljut 1 war 1971 die erste Raumstation der Welt." },
+  { question: "In welchem Jahr wurde die deutsche Einheit vollzogen?", options: ["1989", "1990", "1991", "1992"], correct: 1, category: "Geschichte", difficulty: "leicht" },
+
+  // ── WISSENSCHAFT ──
+  { question: "Welches chemische Element hat das Symbol 'Au'?", options: ["Silber", "Kupfer", "Gold", "Platin"], correct: 2, category: "Wissenschaft", difficulty: "mittel" },
+  { question: "Was ist H₂O?", options: ["Wasserstoffperoxid", "Wasser", "Salzsäure", "Alkohol"], correct: 1, category: "Wissenschaft", difficulty: "leicht" },
+  { question: "Wie viele Planeten hat unser Sonnensystem?", options: ["7", "8", "9", "10"], correct: 1, category: "Wissenschaft", difficulty: "leicht", explanation: "Seit 2006 hat unser Sonnensystem offiziell 8 Planeten — Pluto wurde zum Zwergplaneten." },
+  { question: "Was ist die Lichtgeschwindigkeit (ca.)?", options: ["200.000 km/s", "300.000 km/s", "400.000 km/s", "500.000 km/s"], correct: 1, category: "Wissenschaft", difficulty: "mittel" },
+  { question: "Wer entdeckte die Relativitätstheorie?", options: ["Isaac Newton", "Max Planck", "Albert Einstein", "Niels Bohr"], correct: 2, category: "Wissenschaft", difficulty: "leicht" },
+  { question: "Aus wie vielen Knochen besteht das menschliche Skelett (Erwachsener)?", options: ["186", "206", "226", "246"], correct: 1, category: "Wissenschaft", difficulty: "mittel" },
+  { question: "Was ist die häufigste Blutgruppe in Deutschland?", options: ["A positiv", "B positiv", "0 positiv", "AB positiv"], correct: 0, category: "Wissenschaft", difficulty: "schwer", explanation: "In Deutschland ist Blutgruppe A+ mit ca. 37% am häufigsten." },
+  { question: "Welches Gas macht ca. 78% der Erdatmosphäre aus?", options: ["Sauerstoff", "Kohlendioxid", "Stickstoff", "Argon"], correct: 2, category: "Wissenschaft", difficulty: "mittel" },
+  { question: "Wie heißt die kleinste Einheit des Lebens?", options: ["Atom", "Molekül", "Zelle", "Gen"], correct: 2, category: "Wissenschaft", difficulty: "leicht" },
+  { question: "Was misst ein Seismograph?", options: ["Luftdruck", "Erdbeben", "Windgeschwindigkeit", "Strahlung"], correct: 1, category: "Wissenschaft", difficulty: "mittel" },
+
+  // ── SPORT ──
+  { question: "Wie viele Spieler hat eine Fußballmannschaft auf dem Feld?", options: ["9", "10", "11", "12"], correct: 2, category: "Sport", difficulty: "leicht" },
+  { question: "In welcher Stadt fanden die ersten modernen Olympischen Spiele statt?", options: ["Paris", "London", "Athen", "Rom"], correct: 2, category: "Sport", difficulty: "mittel" },
+  { question: "Wie viele Ringe hat das olympische Symbol?", options: ["3", "4", "5", "6"], correct: 2, category: "Sport", difficulty: "leicht" },
+  { question: "Welches Land hat die meisten Fußball-Weltmeisterschaften gewonnen?", options: ["Deutschland", "Argentinien", "Brasilien", "Italien"], correct: 2, category: "Sport", difficulty: "leicht", explanation: "Brasilien hat 5 WM-Titel gewonnen (1958, 62, 70, 94, 2002)." },
+  { question: "In welchem Jahr fand die erste Fußball-WM statt?", options: ["1926", "1930", "1934", "1938"], correct: 1, category: "Sport", difficulty: "mittel" },
+  { question: "Wie lang ist ein Marathon in km?", options: ["40 km", "41,195 km", "42,195 km", "43 km"], correct: 2, category: "Sport", difficulty: "mittel" },
+  { question: "Wer hält den Weltrekord im 100-Meter-Lauf?", options: ["Carl Lewis", "Usain Bolt", "Asafa Powell", "Tyson Gay"], correct: 1, category: "Sport", difficulty: "leicht" },
+  { question: "Wie viele Punkte zählt ein Touchdown im American Football?", options: ["4", "5", "6", "7"], correct: 2, category: "Sport", difficulty: "mittel" },
+  { question: "Was sind die vier Grand-Slam-Turniere im Tennis?", options: ["Wimbledon, French Open, US Open, Australian Open", "Wimbledon, French Open, Italian Open, US Open", "Wimbledon, US Open, Canadian Open, Australian Open", "French Open, US Open, Australian Open, Swiss Open"], correct: 0, category: "Sport", difficulty: "mittel" },
+  { question: "Wann gewann Deutschland zuletzt die Fußball-WM?", options: ["2010", "2014", "2018", "2022"], correct: 1, category: "Sport", difficulty: "leicht" },
+
+  // ── KULTUR & KUNST ──
+  { question: "Wer malte die Mona Lisa?", options: ["Michelangelo", "Raffael", "Leonardo da Vinci", "Botticelli"], correct: 2, category: "Kultur", difficulty: "leicht" },
+  { question: "In welchem Land wurde Beethoven geboren?", options: ["Österreich", "Deutschland", "Schweiz", "Polen"], correct: 1, category: "Kultur", difficulty: "mittel", explanation: "Ludwig van Beethoven wurde 1770 in Bonn geboren." },
+  { question: "Wie viele Sinfonien schrieb Beethoven?", options: ["7", "8", "9", "10"], correct: 2, category: "Kultur", difficulty: "mittel" },
+  { question: "Wer schrieb 'Faust'?", options: ["Schiller", "Goethe", "Heine", "Kleist"], correct: 1, category: "Kultur", difficulty: "leicht" },
+  { question: "In welcher Stadt steht der Eiffelturm?", options: ["Lyon", "Nizza", "Bordeaux", "Paris"], correct: 3, category: "Kultur", difficulty: "leicht" },
+  { question: "Welches Kunstwerk steht in New York Harbour?", options: ["Freiheitsglocke", "Freiheitsstatue", "Empire State Building", "Rockefeller Center"], correct: 1, category: "Kultur", difficulty: "leicht" },
+  { question: "Wer schrieb 'Romeo und Julia'?", options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Oscar Wilde"], correct: 1, category: "Kultur", difficulty: "leicht" },
+  { question: "Welche Kunstrichtung vertrat Salvador Dalí?", options: ["Kubismus", "Impressionismus", "Surrealismus", "Expressionismus"], correct: 2, category: "Kultur", difficulty: "mittel" },
+  { question: "Wie heißt Mozarts bekannteste Oper?", options: ["Figaro", "Don Giovanni", "Zauberflöte", "Così fan tutte"], correct: 2, category: "Kultur", difficulty: "mittel" },
+  { question: "In welchem Land befindet sich das Kolosseum?", options: ["Griechenland", "Spanien", "Türkei", "Italien"], correct: 3, category: "Kultur", difficulty: "leicht" },
+
+  // ── TECHNOLOGIE ──
+  { question: "Wer gründete Apple?", options: ["Bill Gates", "Elon Musk", "Steve Jobs", "Mark Zuckerberg"], correct: 2, category: "Technologie", difficulty: "leicht", explanation: "Apple wurde 1976 von Steve Jobs, Steve Wozniak und Ronald Wayne gegründet." },
+  { question: "In welchem Jahr wurde das World Wide Web erfunden?", options: ["1985", "1989", "1991", "1993"], correct: 1, category: "Technologie", difficulty: "mittel", explanation: "Tim Berners-Lee erfand das WWW 1989 am CERN." },
+  { question: "Was bedeutet das Kürzel 'CPU'?", options: ["Central Power Unit", "Central Processing Unit", "Computer Program Unit", "Core Performance Unit"], correct: 1, category: "Technologie", difficulty: "leicht" },
+  { question: "Was ist Bitcoin?", options: ["Eine Aktie", "Eine Kryptowährung", "Eine Bank", "Ein Zahlungssystem"], correct: 1, category: "Technologie", difficulty: "leicht" },
+  { question: "Wie viel Bit hat ein Byte?", options: ["4", "8", "16", "32"], correct: 1, category: "Technologie", difficulty: "leicht" },
+  { question: "Welche Programmiersprache wurde von Guido van Rossum entwickelt?", options: ["Java", "Ruby", "Python", "Perl"], correct: 2, category: "Technologie", difficulty: "mittel" },
+  { question: "Was bedeutet 'HTML'?", options: ["HyperText Markup Language", "High Transfer Markup Language", "HyperText Main Language", "HyperText Measurement Language"], correct: 0, category: "Technologie", difficulty: "leicht" },
+  { question: "Welches Unternehmen entwickelte das Android-Betriebssystem?", options: ["Apple", "Samsung", "Microsoft", "Google"], correct: 3, category: "Technologie", difficulty: "leicht" },
+  { question: "Was ist ein Algorithmus?", options: ["Ein Computervirus", "Eine Schritt-für-Schritt-Anleitung zur Problemlösung", "Eine Datenbankstruktur", "Ein Netzwerkprotokoll"], correct: 1, category: "Technologie", difficulty: "leicht" },
+  { question: "Wer ist der Gründer von Tesla?", options: ["Elon Musk allein", "Martin Eberhard und Marc Tarpenning", "Elon Musk und Peter Thiel", "Jeff Bezos"], correct: 1, category: "Technologie", difficulty: "schwer", explanation: "Tesla wurde 2003 von Martin Eberhard und Marc Tarpenning gegründet. Musk stieg 2004 als Investor ein." },
+
+  // ── NATUR ──
+  { question: "Wie lange dauert es, bis Licht von der Sonne zur Erde kommt?", options: ["4 Minuten", "8 Minuten", "12 Minuten", "20 Minuten"], correct: 1, category: "Natur", difficulty: "mittel" },
+  { question: "Welches ist das größte Tier der Welt?", options: ["Elefant", "Blauwal", "Riesenschildkröte", "Weißer Hai"], correct: 1, category: "Natur", difficulty: "leicht" },
+  { question: "Wie viele Beine hat eine Spinne?", options: ["6", "8", "10", "12"], correct: 1, category: "Natur", difficulty: "leicht" },
+  { question: "Wie nennt man den Prozess der Photosynthese?", options: ["CO₂ + H₂O → Glukose + O₂", "O₂ + Glukose → CO₂ + H₂O", "H₂O → H₂ + O", "CO₂ → C + O₂"], correct: 0, category: "Natur", difficulty: "schwer" },
+  { question: "Welches Tier legt keine Eier?", options: ["Ente", "Krokodil", "Delfin", "Schildkröte"], correct: 2, category: "Natur", difficulty: "leicht" },
+  { question: "Wie heißt der Vorgang, wenn Tiere im Winter schlafen?", options: ["Kälteschlaf", "Winterschlaf", "Torpor", "Hibernation"], correct: 1, category: "Natur", difficulty: "leicht" },
+  { question: "Wie alt kann eine Riesenschildkröte werden?", options: ["Bis 80 Jahre", "Bis 100 Jahre", "Bis 150 Jahre", "Bis 200 Jahre"], correct: 2, category: "Natur", difficulty: "mittel" },
+  { question: "Was ist die häufigste Baumart in deutschen Wäldern?", options: ["Eiche", "Buche", "Fichte", "Kiefer"], correct: 2, category: "Natur", difficulty: "schwer", explanation: "Die Fichte ist mit ca. 25% die häufigste Baumart in deutschen Wäldern." },
+  { question: "Wie viele Arten von Bienen gibt es weltweit (ca.)?", options: ["500", "2.000", "20.000", "100.000"], correct: 2, category: "Natur", difficulty: "schwer" },
+  { question: "Was ist ein Herbivore?", options: ["Ein Fleischfresser", "Ein Allesfresser", "Ein Pflanzenfresser", "Ein Fischfresser"], correct: 2, category: "Natur", difficulty: "leicht" },
+
+  // ── 1. BImSchV ──
+  { question: "Für welche Feuerungsanlagen gilt die 1. BImSchV?", options: ["Nur für Gasheizungen", "Kleine und mittlere Feuerungsanlagen bis 1 MW", "Großindustrielle Anlagen ab 50 MW", "Alle Anlagen ohne Ausnahme"], correct: 1, category: "1. BImSchV", difficulty: "leicht", explanation: "§ 1 Abs. 1: Die 1. BImSchV gilt für Feuerungsanlagen mit einer Nennwärmeleistung unter 1 Megawatt." },
+  { question: "Innerhalb welcher Frist nach Inbetriebnahme muss eine neue Feuerungsanlage erstmalig gemessen werden?", options: ["2 Wochen", "4 Wochen", "3 Monate", "6 Monate"], correct: 1, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 14 Abs. 2: Die Erstmessung ist innerhalb von 4 Wochen nach Inbetriebnahme durch den Schornsteinfeger durchzuführen." },
+  { question: "Wie oft muss eine Nicht-Einzelraumfeuerungsanlage für feste Brennstoffe wiederkehrend gemessen werden?", options: ["Jährlich", "Alle 2 Jahre", "Alle 3 Jahre", "Alle 5 Jahre"], correct: 1, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 15 Abs. 1: Einmal in jedem zweiten Kalenderjahr ist die Messung durch den Schornsteinfeger durchzuführen." },
+  { question: "Welcher CO-Grenzwert gilt (Stufe 2) für Holzzentralheizungen ab 4 kW (Errichtung nach 31.12.2014)?", options: ["0,25 g/m³", "0,4 g/m³", "1,0 g/m³", "4,0 g/m³"], correct: 1, category: "1. BImSchV", difficulty: "schwer", explanation: "Stufe 2 (§ 5 Abs. 1): CO-Grenzwert = 0,4 g/m³, Staubgrenzwert = 0,02 g/m³ für Holz-Zentralheizungen ab 4 kW." },
+  { question: "Welcher Staubgrenzwert gilt (Stufe 2) für neue Holzheizkessel ab 4 kW?", options: ["0,02 g/m³ (20 mg/m³)", "0,06 g/m³ (60 mg/m³)", "0,10 g/m³ (100 mg/m³)", "0,15 g/m³ (150 mg/m³)"], correct: 0, category: "1. BImSchV", difficulty: "schwer", explanation: "Stufe 2: Staubgrenzwert für Holz-/Kohlebrennstoffe ab 4 kW = 0,02 g/m³ = 20 mg/m³ (alt: 150 mg/m³ vor 2010)." },
+  { question: "Welche Grenzwerte müssen Einzelraumfeuerungsanlagen einhalten, die vor dem 22. März 2010 errichtet wurden?", options: ["Staub 0,04 g/m³, CO 1,25 g/m³", "Staub 0,10 g/m³, CO 2,0 g/m³", "Staub 0,15 g/m³, CO 4,0 g/m³", "Staub 0,02 g/m³, CO 0,4 g/m³"], correct: 2, category: "1. BImSchV", difficulty: "schwer", explanation: "§ 26 Abs. 1: Bestehende Einzelraumfeuerungsanlagen dürfen nur bei Staub ≤ 0,15 g/m³ und CO ≤ 4,0 g/m³ weiterbetrieben werden." },
+  { question: "Bis wann mussten Einzelraumfeuerungsanlagen (Typschild 1995–21.3.2010) nachrüsten oder außer Betrieb gehen?", options: ["31. Dezember 2020", "31. Dezember 2022", "31. Dezember 2024", "31. Dezember 2027"], correct: 2, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 26 Abs. 2: Anlagen mit Typschild 01.01.1995–21.03.2010 mussten bis 31.12.2024 die Grenzwerte einhalten, nachrüsten oder stillgelegt werden." },
+  { question: "Was müssen Einzelraumfeuerungsanlagen, die ab 22. März 2010 errichtet wurden, zwingend nachweisen?", options: ["Keine Anforderungen", "Typprüfung mit Nachweis der Stufe-1-Grenzwerte", "Jahresmessungen durch den Schornsteinfeger", "Zertifizierung durch das Umweltbundesamt"], correct: 1, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 4 Abs. 3: Einzelraumfeuerungsanlagen ab 22.03.2010 müssen durch Typprüfung des Herstellers die Einhaltung von Grenzwerten und Mindestwirkungsgrad (Anlage 4) belegen." },
+  { question: "Welcher Mindestwirkungsgrad gilt für Pelletöfen ohne Wassertasche?", options: ["70 %", "75 %", "80 %", "85 %"], correct: 3, category: "1. BImSchV", difficulty: "schwer", explanation: "Anlage 4: Pelletöfen ohne Wassertasche müssen einen Mindestwirkungsgrad von 85 % erreichen." },
+  { question: "Auf welchen Referenz-Sauerstoffgehalt im Abgas beziehen sich die Grenzwerte für feste Brennstoffe?", options: ["6 %", "8 %", "10 %", "13 %"], correct: 3, category: "1. BImSchV", difficulty: "schwer", explanation: "§ 5 Abs. 2: Emissionsgrenzen für feste Brennstoffe beziehen sich auf 13 % Sauerstoffgehalt im trockenen Abgas." },
+  { question: "Welcher maximale Feuchtegehalt ist bei Holz als Brennstoff zulässig?", options: ["15 %", "20 %", "25 %", "30 %"], correct: 2, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 3 Abs. 3: Holz darf beim Verbrennen einen Feuchtegehalt von 25 % nicht überschreiten (Ausnahme: geeignete Hackschnitzelfeuerungen)." },
+  { question: "Ab welcher Nennwärmeleistung gilt die wiederkehrende Messpflicht (§ 15) für Festbrennstoffkessel?", options: ["Ab 1 kW", "Ab 4 kW", "Ab 15 kW", "Ab 50 kW"], correct: 1, category: "1. BImSchV", difficulty: "mittel", explanation: "§ 15 Abs. 1: Messpflicht ab 4 kW, ausgenommen Einzelraumfeuerungsanlagen." },
+  { question: "Welchen CO-Grenzwert haben Kaminöfen (Raumheizer Flachfeuerung) gemäß Stufe 1?", options: ["1,0 g/m³", "1,25 g/m³", "2,0 g/m³", "4,0 g/m³"], correct: 2, category: "1. BImSchV", difficulty: "schwer", explanation: "Anlage 4, Stufe 1: Raumheizer mit Flachfeuerung (Kaminöfen, Zeitbrand) CO = 2,0 g/m³, Staub = 0,075 g/m³, Wirkungsgrad ≥ 73 %." },
+  { question: "Was versteht die 1. BImSchV unter einer Einzelraumfeuerungsanlage?", options: ["Eine Zentralheizung", "Eine Gasfeuerungsanlage", "Eine Feuerstätte, die vorwiegend den Aufstellraum beheizt (z.B. Kaminofen)", "Nur Pelletöfen"], correct: 2, category: "1. BImSchV", difficulty: "leicht", explanation: "§ 2: Einzelraumfeuerungsanlagen dienen vorwiegend zur Beheizung des Aufstellraums, z. B. Kaminöfen, Kachelöfen, offene Kamine." },
+  { question: "Bis wann mussten Festbrennstoffkessel (Errichtung 01.01.2005–21.03.2010) die Stufe-1-Grenzwerte einhalten?", options: ["01.01.2019", "01.01.2022", "01.01.2025", "01.01.2028"], correct: 2, category: "1. BImSchV", difficulty: "schwer", explanation: "§ 25 Abs. 1: Kessel errichtet 01.01.2005–21.03.2010 müssen ab 01.01.2025 die Grenzwerte der Stufe 1 einhalten." },
+
+  // ── KÜO (Kehr- und Überprüfungsordnung Bayern) ──
+  { question: "Wie oft im Jahr sind kehrpflichtige Anlagen in Bayern grundsätzlich zu kehren?", options: ["Einmal", "Zweimal", "Dreimal", "Viermal"], correct: 3, category: "KÜO", difficulty: "leicht", explanation: "§ 2 Abs. 1 KÜO: Grundregel: viermal im Jahr, sofern nicht in Abs. 2–5 oder § 3 abweichend geregelt." },
+  { question: "Wie oft sind Abgasleitungen von Feuerstätten für feste/flüssige Brennstoffe zu kehren, wenn sie nur in der Heizperiode genutzt werden?", options: ["Einmal", "Zweimal", "Dreimal", "Viermal"], correct: 2, category: "KÜO", difficulty: "mittel", explanation: "§ 2 Abs. 2 KÜO: Abgasleitungen und Rauchkamine, die nur in der üblichen Heizperiode genutzt werden, sind dreimal jährlich zu kehren." },
+  { question: "Nach wie vielen Betriebstagen sind zeitweise genutzte Anlagen (§ 2 Abs. 4 KÜO) zu kehren?", options: ["Nach je 30 Betriebstagen", "Nach je 45 Betriebstagen", "Nach je 60 Betriebstagen", "Nach je 90 Betriebstagen"], correct: 1, category: "KÜO", difficulty: "schwer", explanation: "§ 2 Abs. 4 KÜO: Zeitweise genutzte Anlagen sind nach je 45 Betriebstagen, mindestens einmal jährlich nach der Betriebszeit, zu kehren." },
+  { question: "Wie oft sind bestimmte Anlagen gemäß § 3 Abs. 1 KÜO auf Gebrauchsfähigkeit zu überprüfen?", options: ["Einmal pro Jahr", "Zweimal pro Jahr", "Alle zwei Jahre", "Alle fünf Jahre"], correct: 1, category: "KÜO", difficulty: "leicht", explanation: "§ 3 Abs. 1 KÜO: Bestimmte Anlagen sind zweimal im Jahr auf einwandfreie Gebrauchsfähigkeit zu überprüfen." },
+  { question: "In welchem Abstand sind bestimmte Gasanlagen-Abgaswege laut § 3 Abs. 2 KÜO zu überprüfen?", options: ["Jährlich", "Alle 2 Jahre", "Alle 3 Jahre", "Alle 5 Jahre"], correct: 1, category: "KÜO", difficulty: "mittel", explanation: "§ 3 Abs. 2 KÜO: Jedes zweite Jahr sind bestimmte Abgasanlagen zu überprüfen und bei Bedarf zu reinigen. Der Heizgasweg ist ausgenommen." },
+  { question: "Welchen CO-Grenzwert darf die CO-Messung gemäß § 3 Abs. 4 KÜO nicht überschreiten?", options: ["500 ppm", "1.000 ppm", "2.000 ppm", "4.000 ppm"], correct: 1, category: "KÜO", difficulty: "mittel", explanation: "§ 3 Abs. 4 KÜO: Der CO-Gehalt darf 1.000 ppm bezogen auf unvermäßigtes Abgas nicht überschreiten." },
+  { question: "Wie lange vor einem Kehr- oder Überprüfungstermin muss dieser angekündigt werden?", options: ["Mindestens 1 Werktag", "Mindestens 2 Werktage", "Mindestens 5 Werktage", "Mindestens 1 Woche"], correct: 1, category: "KÜO", difficulty: "leicht", explanation: "§ 7 Abs. 1 KÜO: Der Termin ist spätestens 2 Werktage vor der Durchführung anzukündigen, soweit der Eigentümer nicht darauf verzichtet." },
+  { question: "Wie frühzeitig ist die Messung nach § 15 der 1. BImSchV dem Betreiber schriftlich anzukündigen?", options: ["2 Wochen vorher", "4 Wochen vorher", "6 bis 8 Wochen vorher", "3 Monate vorher"], correct: 2, category: "KÜO", difficulty: "schwer", explanation: "§ 7 Abs. 1 KÜO: Der Zeitpunkt der Messung nach § 15 BImSchV ist dem Betreiber zwischen 6 und 8 Wochen vorher schriftlich anzukündigen." },
+  { question: "Wer muss beim Ausbrennen einer kehrpflichtigen Anlage dauerhaft anwesend sein?", options: ["Der Hausbesitzer", "Die Feuerwehr", "Ein Kaminkehrermeister", "Eine Behörde"], correct: 2, category: "KÜO", difficulty: "mittel", explanation: "§ 6 Abs. 2 KÜO: Die Arbeit ist von einem Kaminkehrermeister auszuführen oder dauernd zu beaufsichtigen." },
+  { question: "Wen muss der Kaminkehrer vor dem Ausbrennen einer Anlage benachrichtigen?", options: ["Nur den Hausbesitzer", "Hausbesitzer und Gemeinde", "Eigentümer, Hausbewohner, Gemeinde und Feuerwehr", "Nur die Feuerwehr"], correct: 2, category: "KÜO", difficulty: "schwer", explanation: "§ 6 Abs. 2 KÜO: Mitzuteilen sind: Eigentümer/Beauftragte, Hausbewohner, Gemeinde und Feuerwehr." },
+  { question: "Unter welcher Bedingung dürfen zusätzliche Kehrungen über die Pflichtfristen hinaus erfolgen?", options: ["Nur mit Eigentümer-Zustimmung", "Wenn es die Feuersicherheit erfordert", "Nur auf Behördenanweisung", "Immer auf Wunsch des Schornsteinfegers"], correct: 1, category: "KÜO", difficulty: "leicht", explanation: "§ 5 KÜO: Zusätzliche Kehrungen sind erlaubt, wenn es die Feuersicherheit erfordert; sie sind auf Verlangen schriftlich zu begründen." },
+  { question: "Was sind laut KÜO 'Rauchgase'?", options: ["Verbrennungsprodukte gasförmiger Brennstoffe", "Verbrennungsprodukte fester oder flüssiger Brennstoffe", "Alle Verbrennungsabgase", "Nur Abgase aus Holzfeuerungen"], correct: 1, category: "KÜO", difficulty: "mittel", explanation: "§ 1 KÜO: Rauchgase = Verbrennungsprodukte fester oder flüssiger Brennstoffe. Abgase = Verbrennungsprodukte gasförmiger Brennstoffe." },
+  { question: "Was sind laut KÜO 'Abgase'?", options: ["Verbrennungsprodukte fester Brennstoffe", "Verbrennungsprodukte gasförmiger Brennstoffe", "Verbrennungsprodukte flüssiger Brennstoffe", "Alle Verbrennungsprodukte"], correct: 1, category: "KÜO", difficulty: "mittel", explanation: "§ 1 KÜO: Abgase sind Verbrennungsprodukte gasförmiger Brennstoffe (Gegensatz: Rauchgase aus festen/flüssigen Brennstoffen)." },
+  { question: "Was umfasst die Reinigung der Abgaswege bei Gasfeuerstätten gemäß KÜO ausdrücklich NICHT?", options: ["Den Abgaskamin", "Den Heizgasweg", "Die Abgasleitungen", "Den Abgaskanal"], correct: 1, category: "KÜO", difficulty: "schwer", explanation: "§ 3 Abs. 2 KÜO: Die Reinigung der Abgaswege umfasst ausdrücklich nicht den Heizgasweg (= Strömungsstrecke innerhalb der Feuerstätte)." },
+  { question: "Wie oft sind Lüftungseinrichtungen für Feuerstätten für feste und flüssige Brennstoffe gemäß KÜO zu überprüfen?", options: ["Alle zwei Jahre", "Einmal im Jahr", "Zweimal im Jahr", "Alle fünf Jahre"], correct: 1, category: "KÜO", difficulty: "mittel", explanation: "§ 3 Abs. 7 KÜO: Lüftungseinrichtungen für Feuerstätten für feste und flüssige Brennstoffe sind einmal im Jahr zu überprüfen und bei Bedarf zu reinigen." },
+
+  // ── POLITIK & GESELLSCHAFT ──
+  { question: "Wie viele Bundesländer hat Deutschland?", options: ["14", "15", "16", "17"], correct: 2, category: "Politik", difficulty: "leicht" },
+  { question: "Was ist die Hauptaufgabe des Bundestags?", options: ["Gesetze verabschieden", "Krieg erklären", "Den Bundeskanzler ernennen", "Steuern erheben"], correct: 0, category: "Politik", difficulty: "leicht" },
+  { question: "Wie lange ist die Amtszeit eines deutschen Bundespräsidenten?", options: ["4 Jahre", "5 Jahre", "6 Jahre", "7 Jahre"], correct: 1, category: "Politik", difficulty: "mittel" },
+  { question: "In welchem Jahr wurde die Europäische Union gegründet?", options: ["1989", "1992", "1993", "1999"], correct: 2, category: "Politik", difficulty: "mittel", explanation: "Der Maastricht-Vertrag trat am 1. November 1993 in Kraft und gründete die EU." },
+  { question: "Wie viele ständige Mitglieder hat der UN-Sicherheitsrat?", options: ["3", "5", "7", "10"], correct: 1, category: "Politik", difficulty: "mittel" },
+  { question: "In welchem Jahr trat Deutschland der EU bei?", options: ["Deutschland war Gründungsmitglied", "1973", "1990", "1993"], correct: 0, category: "Politik", difficulty: "schwer", explanation: "Westdeutschland war 1952 Gründungsmitglied der EG/Vorläufer der EU." },
+  { question: "Was bedeutet das Grundgesetz?", options: ["Die EU-Verfassung", "Die Verfassung Deutschlands", "Ein internationaler Vertrag", "Das Bundesrecht"], correct: 1, category: "Politik", difficulty: "leicht" },
+  { question: "Wie heißt das Parlament der Europäischen Union?", options: ["EU-Rat", "Europaparlament", "EU-Kommission", "Ministerrat"], correct: 1, category: "Politik", difficulty: "leicht" },
+  { question: "Welche Partei regiert aktuell in Deutschland (Stand 2025)?", options: ["SPD", "CDU/CSU", "Grüne", "CDU/CSU + SPD"], correct: 3, category: "Politik", difficulty: "mittel" },
+  { question: "Wer ist Bundesratspräsident(in) auf Rotationsbasis?", options: ["Immer der Regierungschef von Bayern", "Immer ein Ministerpräsident, jährlich wechselnd", "Der Bundespräsident ernennt ihn", "Der Bundestag wählt ihn"], correct: 1, category: "Politik", difficulty: "schwer" },
+];
+
+const CATEGORIES = ["Alle", "1. BImSchV", "KÜO", "Geographie", "Geschichte", "Wissenschaft", "Sport", "Kultur", "Technologie", "Natur", "Politik"];
+const DIFFICULTIES = ["alle", "leicht", "mittel", "schwer"] as const;
+const QUIZ_LENGTHS = [5, 10, 15, 20];
+
+const DIFF_COLORS: Record<string, string> = {
+  leicht: "#4ade80",
+  mittel: "#facc15",
+  schwer: "#f87171",
+  alle: "#a78bfa",
+};
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+type Screen = "home" | "quiz" | "result";
+
+export default function QuizPage() {
+  const [screen, setScreen] = useState<Screen>("home");
+  const [selectedCategory, setSelectedCategory] = useState("Alle");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<typeof DIFFICULTIES[number]>("alle");
+  const [quizLength, setQuizLength] = useState(10);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [showExpl, setShowExpl] = useState(false);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Best scores from localStorage
+  const [bestScore, setBestScore] = useState(() => {
+    try { return parseInt(localStorage.getItem("lifeos_quiz_best") || "0"); } catch { return 0; }
+  });
+  const [totalPlayed, setTotalPlayed] = useState(() => {
+    try { return parseInt(localStorage.getItem("lifeos_quiz_total") || "0"); } catch { return 0; }
+  });
+
+  // Timer effect
+  useEffect(() => {
+    if (timerActive && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) {
+            handleTimeout();
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [timerActive, currentIdx]);
+
+  function handleTimeout() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimerActive(false);
+    setSelected(-1); // timed out marker
+    setAnswers(prev => { const n = [...prev]; n[currentIdx] = -1; return n; });
+  }
+
+  function startQuiz() {
+    let pool = ALL_QUESTIONS;
+    if (selectedCategory !== "Alle") pool = pool.filter(q => q.category === selectedCategory);
+    if (selectedDifficulty !== "alle") pool = pool.filter(q => q.difficulty === selectedDifficulty);
+    const shuffled = shuffle(pool).slice(0, quizLength);
+    setQuestions(shuffled);
+    setCurrentIdx(0);
+    setSelected(null);
+    setAnswers([]);
+    setScore(0);
+    setShowExpl(false);
+    setTimeLeft(30);
+    setTimerActive(true);
+    setScreen("quiz");
+  }
+
+  function handleAnswer(idx: number) {
+    if (selected !== null) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimerActive(false);
+    setSelected(idx);
+    setAnswers(prev => { const n = [...prev]; n[currentIdx] = idx; return n; });
+    if (idx === questions[currentIdx].correct) setScore(s => s + 1);
+  }
+
+  function nextQuestion() {
+    if (currentIdx + 1 >= questions.length) {
+      finishQuiz();
+    } else {
+      setCurrentIdx(i => i + 1);
+      setSelected(null);
+      setShowExpl(false);
+      setTimeLeft(30);
+      setTimerActive(true);
+    }
+  }
+
+  function finishQuiz() {
+    const finalScore = answers.filter((a, i) => a === questions[i]?.correct).length + (selected === questions[currentIdx]?.correct && selected !== null ? 1 : 0);
+    const corrected = questions.filter((q, i) => answers[i] === q.correct).length;
+    const pct = Math.round((corrected / questions.length) * 100);
+    if (pct > bestScore) {
+      setBestScore(pct);
+      try { localStorage.setItem("lifeos_quiz_best", String(pct)); } catch {}
+    }
+    setTotalPlayed(t => {
+      const n = t + 1;
+      try { localStorage.setItem("lifeos_quiz_total", String(n)); } catch {}
+      return n;
+    });
+    setTimerActive(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setScreen("result");
+  }
+
+  function goHome() {
+    setScreen("home");
+    setTimerActive(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+  }
+
+  const q = questions[currentIdx];
+  const correctAnswers = answers.filter((a, i) => a === questions[i]?.correct).length;
+  const pct = questions.length ? Math.round((correctAnswers / questions.length) * 100) : 0;
+
+  // ── HOME SCREEN ──
+  if (screen === "home") {
+    return (
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px 100px" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontSize: "2.4rem", marginBottom: 6 }}>🧠</div>
+          <h1 style={{ fontSize: "1.4rem", fontWeight: 700, color: "hsl(0 0% 92%)", margin: 0 }}>Allgemeinbildung Quiz</h1>
+          <p style={{ fontSize: "0.8rem", color: "hsl(0 0% 40%)", marginTop: 6 }}>
+            {ALL_QUESTIONS.length} Fragen · {CATEGORIES.length - 1} Kategorien
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+          {[
+            { label: "Bester Score", value: bestScore + "%", icon: "🏆", color: "#facc15" },
+            { label: "Gespielt", value: totalPlayed + "x", icon: "🎮", color: "#4ade80" },
+          ].map(s => (
+            <div key={s.label} className="wd-card" style={{ padding: "14px 16px", textAlign: "center" }}>
+              <div style={{ fontSize: "1.4rem" }}>{s.icon}</div>
+              <div style={{ fontSize: "1.3rem", fontWeight: 700, color: s.color, lineHeight: 1.2 }}>{s.value}</div>
+              <div style={{ fontSize: "0.7rem", color: "hsl(0 0% 40%)", marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Category */}
+        <div className="wd-card" style={{ padding: 16, marginBottom: 14 }}>
+          <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "hsl(0 0% 38%)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Kategorie</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                style={{
+                  padding: "6px 12px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 500,
+                  background: selectedCategory === cat ? "#4ade80" : "hsl(0 0% 12%)",
+                  color: selectedCategory === cat ? "#000" : "hsl(0 0% 60%)",
+                  transition: "all 0.15s",
+                }}
+              >{cat}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Difficulty */}
+        <div className="wd-card" style={{ padding: 16, marginBottom: 14 }}>
+          <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "hsl(0 0% 38%)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Schwierigkeit</div>
+          <div style={{ display: "flex", gap: 7 }}>
+            {DIFFICULTIES.map(d => (
+              <button
+                key={d}
+                onClick={() => setSelectedDifficulty(d)}
+                style={{
+                  flex: 1, padding: "8px 6px", borderRadius: 10, border: "none", cursor: "pointer",
+                  fontSize: "0.75rem", fontWeight: 600, textTransform: "capitalize",
+                  background: selectedDifficulty === d ? DIFF_COLORS[d] : "hsl(0 0% 12%)",
+                  color: selectedDifficulty === d ? (d === "alle" ? "#fff" : "#000") : "hsl(0 0% 55%)",
+                  transition: "all 0.15s",
+                }}
+              >{d === "alle" ? "Alle" : d.charAt(0).toUpperCase() + d.slice(1)}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Quiz Length */}
+        <div className="wd-card" style={{ padding: 16, marginBottom: 24 }}>
+          <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "hsl(0 0% 38%)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Anzahl Fragen</div>
+          <div style={{ display: "flex", gap: 7 }}>
+            {QUIZ_LENGTHS.map(n => (
+              <button
+                key={n}
+                onClick={() => setQuizLength(n)}
+                style={{
+                  flex: 1, padding: "8px 6px", borderRadius: 10, border: "none", cursor: "pointer",
+                  fontSize: "0.85rem", fontWeight: 600,
+                  background: quizLength === n ? "#4ade80" : "hsl(0 0% 12%)",
+                  color: quizLength === n ? "#000" : "hsl(0 0% 55%)",
+                  transition: "all 0.15s",
+                }}
+              >{n}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Start Button */}
+        <button
+          onClick={startQuiz}
+          className="btn-cyan"
+          style={{ width: "100%", fontSize: "1rem", fontWeight: 700, padding: "14px", borderRadius: 14, letterSpacing: "0.02em" }}
+        >
+          Quiz starten →
+        </button>
+
+        {/* Available pool info */}
+        <div style={{ textAlign: "center", marginTop: 14, fontSize: "0.72rem", color: "hsl(0 0% 32%)" }}>
+          {(() => {
+            let pool = ALL_QUESTIONS;
+            if (selectedCategory !== "Alle") pool = pool.filter(q => q.category === selectedCategory);
+            if (selectedDifficulty !== "alle") pool = pool.filter(q => q.difficulty === selectedDifficulty);
+            return `${pool.length} Fragen verfügbar`;
+          })()}
+        </div>
+      </div>
+    );
+  }
+
+  // ── QUIZ SCREEN ──
+  if (screen === "quiz" && q) {
+    const progress = ((currentIdx) / questions.length) * 100;
+    const timerPct = (timeLeft / 30) * 100;
+    const timerColor = timeLeft > 15 ? "#4ade80" : timeLeft > 8 ? "#facc15" : "#f87171";
+
+    return (
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "16px 16px 100px" }}>
+        {/* Top Bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <button
+            onClick={goHome}
+            style={{ background: "none", border: "none", color: "hsl(0 0% 45%)", cursor: "pointer", fontSize: "0.8rem", padding: "4px 0" }}
+          >← Abbrechen</button>
+          <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "hsl(0 0% 55%)" }}>
+            {currentIdx + 1} / {questions.length}
+          </div>
+          <div style={{ fontSize: "0.8rem", fontWeight: 700, color: timerColor }}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div style={{ height: 3, background: "hsl(0 0% 12%)", borderRadius: 3, marginBottom: 4, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: progress + "%", background: "#4ade80", borderRadius: 3, transition: "width 0.4s" }} />
+        </div>
+        {/* Timer Bar */}
+        <div style={{ height: 2, background: "hsl(0 0% 10%)", borderRadius: 2, marginBottom: 20, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: timerPct + "%", background: timerColor, borderRadius: 2, transition: "width 1s linear" }} />
+        </div>
+
+        {/* Score */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <span style={{
+            padding: "3px 10px", borderRadius: 20, fontSize: "0.7rem", fontWeight: 600,
+            background: `${DIFF_COLORS[q.difficulty]}20`, color: DIFF_COLORS[q.difficulty], border: `1px solid ${DIFF_COLORS[q.difficulty]}40`
+          }}>{q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)}</span>
+          <span style={{
+            padding: "3px 10px", borderRadius: 20, fontSize: "0.7rem", fontWeight: 600,
+            background: "hsl(0 0% 12%)", color: "hsl(0 0% 50%)"
+          }}>{q.category}</span>
+          <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "#4ade80", fontWeight: 600 }}>✓ {score}</span>
+        </div>
+
+        {/* Question */}
+        <div className="wd-card" style={{ padding: "20px 18px", marginBottom: 16, minHeight: 90 }}>
+          <p style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(0 0% 90%)", margin: 0, lineHeight: 1.5 }}>{q.question}</p>
+        </div>
+
+        {/* Options */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+          {q.options.map((opt, i) => {
+            const isSelected = selected === i;
+            const isCorrect = i === q.correct;
+            const isWrong = isSelected && !isCorrect;
+            const showResult = selected !== null;
+            let bg = "hsl(0 0% 10%)";
+            let border = "1px solid hsl(0 0% 16%)";
+            let textColor = "hsl(0 0% 75%)";
+            if (showResult && isCorrect) { bg = "rgba(74,222,128,0.15)"; border = "1px solid rgba(74,222,128,0.5)"; textColor = "#4ade80"; }
+            if (showResult && isWrong) { bg = "rgba(248,113,113,0.15)"; border = "1px solid rgba(248,113,113,0.5)"; textColor = "#f87171"; }
+            const letter = ["A", "B", "C", "D"][i];
+
+            return (
+              <button
+                key={i}
+                onClick={() => handleAnswer(i)}
+                disabled={selected !== null}
+                style={{
+                  display: "flex", alignItems: "center", gap: 12, padding: "13px 14px",
+                  borderRadius: 12, border, background: bg, cursor: selected !== null ? "default" : "pointer",
+                  textAlign: "left", transition: "all 0.2s", WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <span style={{
+                  width: 28, height: 28, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "0.75rem", fontWeight: 700,
+                  background: showResult && isCorrect ? "#4ade80" : showResult && isWrong ? "#f87171" : "hsl(0 0% 15%)",
+                  color: showResult && (isCorrect || isWrong) ? "#000" : "hsl(0 0% 50%)",
+                }}>{letter}</span>
+                <span style={{ fontSize: "0.88rem", fontWeight: 500, color: textColor, lineHeight: 1.4 }}>{opt}</span>
+                {showResult && isCorrect && <span style={{ marginLeft: "auto", color: "#4ade80", fontSize: "1rem" }}>✓</span>}
+                {showResult && isWrong && <span style={{ marginLeft: "auto", color: "#f87171", fontSize: "1rem" }}>✗</span>}
+              </button>
+            );
+          })}
+          {/* Timed out */}
+          {selected === -1 && (
+            <div style={{ textAlign: "center", color: "#f87171", fontSize: "0.82rem", fontWeight: 600, padding: "8px 0" }}>
+              ⏰ Zeit abgelaufen! Richtig wäre: {q.options[q.correct]}
+            </div>
+          )}
+        </div>
+
+        {/* Explanation */}
+        {selected !== null && q.explanation && (
+          <div style={{ marginBottom: 12 }}>
+            <button
+              onClick={() => setShowExpl(v => !v)}
+              style={{ background: "none", border: "none", color: "#a78bfa", fontSize: "0.78rem", cursor: "pointer", padding: 0, fontWeight: 600 }}
+            >
+              {showExpl ? "▲ Erklärung verbergen" : "▼ Erklärung anzeigen"}
+            </button>
+            {showExpl && (
+              <div style={{ marginTop: 8, padding: "12px 14px", borderRadius: 10, background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.25)", fontSize: "0.8rem", color: "hsl(0 0% 70%)", lineHeight: 1.6 }}>
+                💡 {q.explanation}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Next Button */}
+        {selected !== null && (
+          <button
+            onClick={nextQuestion}
+            className="btn-cyan"
+            style={{ width: "100%", padding: "13px", fontSize: "0.95rem", fontWeight: 700, borderRadius: 12 }}
+          >
+            {currentIdx + 1 >= questions.length ? "Ergebnis anzeigen →" : "Nächste Frage →"}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // ── RESULT SCREEN ──
+  if (screen === "result") {
+    const emoji = pct >= 80 ? "🏆" : pct >= 60 ? "😊" : pct >= 40 ? "😐" : "📚";
+    const msg = pct >= 80 ? "Ausgezeichnet!" : pct >= 60 ? "Gut gemacht!" : pct >= 40 ? "Weiter üben!" : "Mehr lernen!";
+
+    return (
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px 100px" }}>
+        {/* Result Header */}
+        <div className="wd-card" style={{ padding: "28px 20px", textAlign: "center", marginBottom: 20, background: "hsl(0 0% 7%)", border: "1px solid rgba(74,222,128,0.2)" }}>
+          <div style={{ fontSize: "3rem", marginBottom: 8 }}>{emoji}</div>
+          <div style={{ fontSize: "2.5rem", fontWeight: 800, color: pct >= 60 ? "#4ade80" : pct >= 40 ? "#facc15" : "#f87171" }}>{pct}%</div>
+          <div style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(0 0% 75%)", marginTop: 4 }}>{msg}</div>
+          <div style={{ fontSize: "0.8rem", color: "hsl(0 0% 40%)", marginTop: 8 }}>
+            {correctAnswers} von {questions.length} richtig
+          </div>
+        </div>
+
+        {/* Category Breakdown */}
+        <div className="wd-card" style={{ padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "hsl(0 0% 38%)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>Ergebnisse</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {questions.map((qst, i) => {
+              const ans = answers[i];
+              const correct = ans === qst.correct;
+              const timeout = ans === -1 || ans === undefined;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 10px", borderRadius: 8, background: correct ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)" }}>
+                  <span style={{ fontSize: "0.85rem", flexShrink: 0, marginTop: 1 }}>{correct ? "✅" : "❌"}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "0.78rem", color: "hsl(0 0% 75%)", fontWeight: 500, marginBottom: 2, lineHeight: 1.4 }}>{qst.question}</div>
+                    {!correct && (
+                      <div style={{ fontSize: "0.72rem", color: "#4ade80" }}>✓ {qst.options[qst.correct]}</div>
+                    )}
+                    {!correct && !timeout && ans !== null && ans >= 0 && (
+                      <div style={{ fontSize: "0.72rem", color: "#f87171" }}>✗ {qst.options[ans]}</div>
+                    )}
+                    {timeout && <div style={{ fontSize: "0.72rem", color: "#facc15" }}>⏰ Zeit abgelaufen</div>}
+                  </div>
+                  <span style={{ fontSize: "0.65rem", flexShrink: 0, padding: "2px 6px", borderRadius: 6, background: `${DIFF_COLORS[qst.difficulty]}15`, color: DIFF_COLORS[qst.difficulty] }}>
+                    {qst.difficulty}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <button onClick={startQuiz} className="btn-cyan" style={{ width: "100%", padding: "13px", fontSize: "0.95rem", fontWeight: 700, borderRadius: 12 }}>
+            Nochmal spielen 🔄
+          </button>
+          <button onClick={goHome} style={{ width: "100%", padding: "13px", fontSize: "0.88rem", fontWeight: 600, borderRadius: 12, background: "hsl(0 0% 12%)", border: "1px solid hsl(0 0% 18%)", color: "hsl(0 0% 60%)", cursor: "pointer" }}>
+            ← Zurück zur Auswahl
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}

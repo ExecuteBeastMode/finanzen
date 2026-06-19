@@ -1,0 +1,495 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── PALETTE ─────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 142 71% 55%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 65%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 142 71% 55%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 11%;
+    --ring: 142 71% 55%;
+    --radius: 0.75rem;
+
+    /* design tokens */
+    --green: #4ade80;
+    --green-dim: rgba(74, 222, 128, 0.09);
+    --green-mid: rgba(74, 222, 128, 0.17);
+    --green-border: rgba(74, 222, 128, 0.22);
+    --surface: hsl(0 0% 8%);
+    --surface-2: hsl(0 0% 11%);
+    --surface-3: hsl(0 0% 14%);
+    --border-subtle: hsl(0 0% 13%);
+    --text-primary: hsl(0 0% 92%);
+    --text-secondary: hsl(0 0% 58%);
+    --text-muted: hsl(0 0% 36%);
+
+    /* iOS-style radius */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 22px;
+  }
+}
+
+/* ─── RESET ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── BODY ────────────────────────────────────────────────────────────────── */
+body {
+  min-height: 100dvh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  background: hsl(0 0% 4%);
+  color: hsl(0 0% 88%);
+  line-height: 1.5;
+  overflow: hidden;
+  font-size: 15px;
+  position: relative;
+}
+
+/* Noise grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* ─── SCROLLBAR ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(0 0% 18%); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 26%); }
+
+/* ─── INPUTS — iOS style ──────────────────────────────────────────────────── */
+input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+  background: hsl(0 0% 10%);
+  border: 1px solid hsl(0 0% 16%);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: rgba(74,222,128,0.45);
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.07);
+}
+input::placeholder, textarea::placeholder { color: hsl(0 0% 28%); }
+
+/* prevent iOS zoom on focus */
+@media (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────────── */
+button { cursor: pointer; background: none; border: none; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+
+/* Primary green button */
+.btn-cyan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  min-height: 42px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-cyan:hover { background: var(--green-mid); }
+.btn-cyan:active { transform: scale(0.97); opacity: 0.85; }
+
+/* Danger button */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: rgba(239,68,68,0.07);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.18);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+  min-height: 42px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-danger:hover { background: rgba(239,68,68,0.14); }
+.btn-danger:active { transform: scale(0.97); }
+
+/* ─── APP SHELL ───────────────────────────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ─── MOBILE HEADER / BOTTOM NAV ─────────────────────────────────────────── */
+.mobile-header { display: none; }
+.mobile-bottom-nav { display: none; }
+
+/* ─── RESPONSIVE ≤768px ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  body { overflow: hidden; font-size: 15px; }
+  .app-shell { flex-direction: column; }
+  .desktop-sidebar { display: none !important; }
+
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: rgba(10,10,10,0.88);
+    border-bottom: 1px solid hsl(0 0% 12%);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    flex-shrink: 0;
+    z-index: 20;
+    position: sticky;
+    top: 0;
+  }
+
+  .app-main {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  /* iOS-style bottom nav */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(8,8,8,0.88);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-bottom: env(safe-area-inset-bottom);
+    backdrop-filter: blur(28px) saturate(1.6);
+    -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  }
+
+  .mobile-tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 4px 8px;
+    min-height: 60px;
+    text-decoration: none;
+    color: hsl(0 0% 32%);
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-tab-item.active { color: var(--green); }
+  .mobile-tab-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.02em; }
+
+  /* Page content padding */
+  .page-content { padding: 16px 14px; }
+
+  /* Grid overrides */
+  .kpi-grid          { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .main-grid         { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .form-grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .form-grid-3       { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .stat-grid-3       { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .stat-grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .budget-stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .budget-legend     { flex-wrap: wrap; gap: 8px !important; }
+
+  .section-title { font-size: 0.72rem; }
+}
+
+/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────────── */
+.desktop-sidebar {
+  width: 210px;
+  background: hsl(0 0% 5%);
+  border-right: 1px solid hsl(0 0% 10%);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  flex-shrink: 0;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.desktop-sidebar nav {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+.desktop-sidebar nav::-webkit-scrollbar { width: 3px; }
+.desktop-sidebar nav::-webkit-scrollbar-thumb { background: hsl(0 0% 15%); border-radius: 99px; }
+.desktop-sidebar nav::-webkit-scrollbar-track { background: transparent; }
+
+/* ─── SIDEBAR LINKS ───────────────────────────────────────────────────────── */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-weight: 400;
+  color: hsl(0 0% 40%);
+  transition: color 0.12s, background 0.12s;
+  border: 1px solid transparent;
+  text-decoration: none;
+  letter-spacing: 0.005em;
+}
+.sidebar-link:hover { color: hsl(0 0% 78%); background: hsl(0 0% 9%); }
+.sidebar-link.active {
+  color: var(--green);
+  background: var(--green-dim);
+  border-color: var(--green-border);
+  font-weight: 600;
+}
+.sidebar-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ─── CARDS — iOS grouped style ───────────────────────────────────────────── */
+.wd-card {
+  background: hsl(0 0% 8%);
+  border: 1px solid hsl(0 0% 13%);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s;
+}
+
+/* Fancy — inner top highlight */
+.wd-card-fancy {
+  background: hsl(0 0% 8%);
+  border: 1px solid hsl(0 0% 13%);
+  border-radius: var(--radius-md);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 1px 3px rgba(0,0,0,0.25);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.wd-card-fancy:hover { border-color: hsl(0 0% 17%); }
+
+/* Accent — green tint */
+.wd-card-accent {
+  background: rgba(74,222,128,0.04);
+  border: 1px solid rgba(74,222,128,0.16);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 rgba(74,222,128,0.06);
+}
+
+/* ─── iOS LIST CELL ───────────────────────────────────────────────────────── */
+/* Grouped list like iOS Settings rows */
+.ios-list {
+  background: hsl(0 0% 8%);
+  border: 1px solid hsl(0 0% 13%);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.ios-list-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  border-bottom: 1px solid hsl(0 0% 11%);
+  gap: 12px;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-list-row:last-child { border-bottom: none; }
+.ios-list-row:active { background: hsl(0 0% 10%); }
+
+/* ─── TAG ─────────────────────────────────────────────────────────────────── */
+.wd-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: hsl(0 0% 12%);
+  color: hsl(0 0% 55%);
+  border: 1px solid hsl(0 0% 16%);
+}
+
+/* ─── STATUS BADGES ───────────────────────────────────────────────────────── */
+.status-idea    { background: hsl(0 0% 12%); color: hsl(0 0% 52%); border: 1px solid hsl(0 0% 17%); }
+.status-filming { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.status-editing { background: rgba(139,92,246,0.08); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+.status-posted  { background: rgba(74,222,128,0.08); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+
+/* ─── SECTION TITLE ───────────────────────────────────────────────────────── */
+.section-title {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: hsl(0 0% 36%);
+}
+
+/* ─── PAGE HEADING ────────────────────────────────────────────────────────── */
+.page-heading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: hsl(0 0% 93%);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+/* ─── DIVIDER ─────────────────────────────────────────────────────────────── */
+.divider { height: 1px; background: hsl(0 0% 12%); }
+
+/* ─── MONO ────────────────────────────────────────────────────────────────── */
+.mono { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ─── GLOW TEXT ───────────────────────────────────────────────────────────── */
+.glow-text { color: hsl(0 0% 95%); }
+.accent-text { color: var(--green); }
+
+/* ─── CHECKBOX — bigger tap area ─────────────────────────────────────────── */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 5px;
+}
+
+/* ─── PROGRESS BAR ────────────────────────────────────────────────────────── */
+.progress-track {
+  height: 4px;
+  background: hsl(0 0% 13%);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ─── PILL TABS — iOS segmented control style ────────────────────────────── */
+.pill-tab-bar {
+  display: flex;
+  gap: 2px;
+  background: hsl(0 0% 9%);
+  border: 1px solid hsl(0 0% 13%);
+  border-radius: 11px;
+  padding: 3px;
+  width: fit-content;
+}
+.pill-tab {
+  padding: 7px 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: hsl(0 0% 40%);
+  transition: background 0.14s, color 0.14s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 36px;
+}
+.pill-tab.active {
+  background: hsl(0 0% 15%);
+  color: hsl(0 0% 90%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.pill-tab:hover:not(.active) { color: hsl(0 0% 65%); }
+
+/* ─── NOTE CARD ───────────────────────────────────────────────────────────── */
+.note-card {
+  background: hsl(0 0% 8%);
+  border: 1px solid hsl(0 0% 13%);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.note-card:hover { border-color: hsl(0 0% 18%); }
+.note-card.pinned { border-color: rgba(74,222,128,0.2); }
+
+/* ─── CHORE ROW ───────────────────────────────────────────────────────────── */
+.chore-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.chore-row:hover { background: hsl(0 0% 10%); }
+.chore-row.done .chore-label { text-decoration: line-through; color: hsl(0 0% 30%); }
+
+/* ─── iOS SPRING PRESS ────────────────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  .btn-cyan:active,
+  .btn-danger:active,
+  .pill-tab:active,
+  .ios-list-row:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: transform 0.08s, opacity 0.08s;
+  }
+}
